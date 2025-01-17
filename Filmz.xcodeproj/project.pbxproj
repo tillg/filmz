@@ -27,6 +27,7 @@
 		F926406C2D38FED400C5F2C0 /* Filmz.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Filmz.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F926407C2D38FED500C5F2C0 /* FilmzTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FilmzTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		F92640862D38FED500C5F2C0 /* FilmzUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FilmzUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		F9D427412D3948CC00B1FDE9 /* Configuration.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Configuration.entitlements; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -75,6 +76,7 @@
 		F92640632D38FED400C5F2C0 = {
 			isa = PBXGroup;
 			children = (
+				F9D427412D3948CC00B1FDE9 /* Configuration.entitlements */,
 				F926406E2D38FED400C5F2C0 /* Filmz */,
 				F926407F2D38FED500C5F2C0 /* FilmzTests */,
 				F92640892D38FED500C5F2C0 /* FilmzUITests */,
