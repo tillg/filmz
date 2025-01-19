@@ -46,13 +46,16 @@ actor IMDBService {
     }
     
     func searchMovies(_ query: String) async throws -> [SearchResult] {
-        // Only search if we have at least 2 characters
-        guard query.count >= 2 else {
+        // Clean and validate the query
+        let cleanedQuery = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        
+        // Only search if we have at least 2 non-whitespace characters
+        guard cleanedQuery.count >= 2 else {
             return []
         }
         
-        // Clean up the query but don't add wildcards
-        guard let encodedQuery = query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) else {
+        // Encode the cleaned query
+        guard let encodedQuery = cleanedQuery.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) else {
             return []
         }
         
