@@ -103,7 +103,7 @@ class FilmStore: ObservableObject {
         // First find the record ID
         let query = CKQuery(
             recordType: "Film",
-            predicate: NSPredicate(format: "title == %@ AND year == %d", film.title, film.year)
+            predicate: NSPredicate(format: "title == %@ AND year == %@", film.title, film.year)
         )
         
         do {
@@ -116,6 +116,46 @@ class FilmStore: ObservableObject {
             print("Failed to delete film: \(error)")
         }
     }
+    
+    func updateFilm(_ film: Film, with data: EditedFilmData) async {
+        let query = CKQuery(
+            recordType: "Film",
+            predicate: NSPredicate(format: "title == %@ AND year == %@", film.title, film.year)
+        )
+        
+        do {
+            let records = try await database.records(matching: query)
+            if let record = try records.matchResults.first?.1.get() {
+                record["genres"] = data.genres
+                record["recommendedBy"] = data.recommendedBy
+                record["intendedAudience"] = data.intendedAudience.rawValue
+                
+                let updatedRecord = try await database.save(record)
+                print("Successfully updated record with ID: \(updatedRecord.recordID)")
+                
+                // Update local array
+                if let index = films.firstIndex(where: { $0.id == film.id }) {
+                    films[index] = Film(
+                        title: film.title,
+                        year: film.year,
+                        genres: data.genres,
+                        imdbRating: film.imdbRating,
+                        posterUrl: film.posterUrl,
+                        description: film.description,
+                        country: film.country,
+                        language: film.language,
+                        releaseDate: film.releaseDate,
+                        runtime: film.runtime,
+                        plot: film.plot,
+                        recommendedBy: data.recommendedBy,
+                        intendedAudience: data.intendedAudience
+                    )
+                }
+            }
+        } catch {
+            print("Failed to update film: \(error)")
+        }
+    }
 }
 
 // Helper extension to convert between CKRecord and Film
@@ -123,7 +163,7 @@ extension Film {
     static func from(record: CKRecord) -> Film? {
         guard 
             let title = record["title"] as? String,
-            let year = record["year"] as? Int,
+            let year = record["year"] as? String,
             let genres = record["genres"] as? [String],
             let posterUrl = record["posterUrl"] as? String,
             let description = record["description"] as? String,

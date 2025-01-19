@@ -1,9 +1,9 @@
 import Foundation
 
 struct Film: Identifiable, Codable {
-    var id: UUID = UUID()
-    var title: String
-    var year: Int
+    let id: UUID
+    let title: String
+    let year: String  // Changed from Int to String
     var genres: [String]
     var myRating: Int?  // 1-10
     var imdbRating: Double  // 1-10
@@ -24,5 +24,37 @@ struct Film: Identifiable, Codable {
         case alone = "Me alone"
         case partner = "Me and partner"
         case family = "Family"
+    }
+    
+    init(
+        id: UUID = UUID(),
+        title: String,
+        year: String,  // Changed from Int to String
+        genres: [String],
+        imdbRating: Double,
+        posterUrl: String,
+        description: String,
+        country: String,
+        language: String,
+        releaseDate: Date,
+        runtime: Int,
+        plot: String,
+        recommendedBy: String?,
+        intendedAudience: AudienceType
+    ) {
+        self.id = id
+        self.title = title
+        self.year = year
+        self.genres = genres
+        self.imdbRating = imdbRating
+        self.posterUrl = posterUrl
+        self.description = description
+        self.country = country
+        self.language = language
+        self.releaseDate = releaseDate
+        self.runtime = runtime
+        self.plot = plot
+        self.recommendedBy = recommendedBy
+        self.intendedAudience = intendedAudience
     }
 } 

@@ -8,7 +8,7 @@ struct ContentView: View {
         NavigationView {
             List {
                 ForEach(filmStore.films) { film in
-                    FilmRow(film: film)
+                    FilmRow(film: film, filmStore: filmStore)
                 }
                 .onDelete { indexSet in
                     for index in indexSet {
