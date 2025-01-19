@@ -4,7 +4,7 @@ actor IMDBService {
     private let apiKey: String
     private let baseUrl = "https://www.omdbapi.com/"
     
-    init(apiKey: String = "YOUR_API_KEY") {
+    init(apiKey: String = "1b5a29bf") {
         self.apiKey = apiKey
     }
     
@@ -45,15 +45,20 @@ actor IMDBService {
         let Value: String
     }
     
-    func searchMovies(query: String) async throws -> [SearchResult] {
-        // Clean up and prepare the search query
-        let cleanedQuery = query.trimmingCharacters(in: .whitespacesAndNewlines)
-        
-        guard !cleanedQuery.isEmpty,
-              let encodedQuery = cleanedQuery.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
-              let url = URL(string: "\(baseUrl)?apikey=\(apiKey)&s=\(encodedQuery)") else {
-            throw URLError(.badURL)
+    func searchMovies(_ query: String) async throws -> [SearchResult] {
+        // Only search if we have at least 2 characters
+        guard query.count >= 2 else {
+            return []
         }
+        
+        // Clean up the query but don't add wildcards
+        guard let encodedQuery = query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) else {
+            return []
+        }
+        
+        // Construct URL with proper parameters and type to include both movies and series
+        let url = URL(string: "\(baseUrl)?apikey=\(apiKey)&s=\(encodedQuery)")!
+        print("Search URL: \(url)")
         
         let (data, _) = try await URLSession.shared.data(from: url)
         let response = try JSONDecoder().decode(SearchResponse.self, from: data)
@@ -62,7 +67,7 @@ actor IMDBService {
             throw NSError(
                 domain: "IMDBService",
                 code: 1,
-                userInfo: [NSLocalizedDescriptionKey: response.Error ?? "No results found"]
+                userInfo: [NSLocalizedDescriptionKey: response.Error ?? "Movie not found!"]
             )
         }
         

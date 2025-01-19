@@ -1,47 +1,35 @@
 import SwiftUI
 
 struct SearchFilmsView: View {
+    let filmStore: FilmStore
+    @Environment(\.dismiss) private var dismiss
     @StateObject private var viewModel = FilmzViewModel()
     @State private var searchText = ""
-    @Environment(\.dismiss) private var dismiss
-    let filmStore: FilmStore
     
     var body: some View {
         NavigationView {
             List {
-                Section {
-                    TextField("Search for a movie or series (min. 3 characters)", text: $searchText)
-                        .textFieldStyle(.roundedBorder)
-                        .onChange(of: searchText) { newValue in
-                            viewModel.searchFilms(query: newValue)
-                        }
-                    
-                    if searchText.count > 0 && searchText.count < 3 {
-                        Text("Please enter at least 3 characters")
-                            .foregroundStyle(.secondary)
-                            .font(.caption)
-                    }
-                }
-                
                 if viewModel.isSearching {
-                    Section {
-                        ProgressView()
-                            .frame(maxWidth: .infinity, alignment: .center)
-                    }
+                    ProgressView()
+                        .frame(maxWidth: .infinity)
+                } else if let error = viewModel.searchError {
+                    Text(error.localizedDescription)
+                        .foregroundColor(.red)
                 } else {
-                    Section {
-                        ForEach(viewModel.searchResults) { result in
-                            NavigationLink {
-                                AddFilmView(imdbResult: result, filmStore: filmStore, dismiss: dismiss)
-                            } label: {
-                                SearchResultRow(result: result)
-                            }
+                    ForEach(viewModel.searchResults) { result in
+                        NavigationLink {
+                            AddFilmView(imdbResult: result, filmStore: filmStore, dismiss: dismiss)
+                        } label: {
+                            SearchResultRow(result: result)
                         }
                     }
                 }
             }
             .navigationTitle("Add Film")
-            .navigationBarTitleDisplayMode(.inline)
+            .searchable(text: $searchText)
+            .onChange(of: searchText) { query in
+                viewModel.search(query)
+            }
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button("Cancel") {

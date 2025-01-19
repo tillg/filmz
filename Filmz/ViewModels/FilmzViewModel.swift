@@ -3,33 +3,29 @@ import SwiftUI
 
 @MainActor
 class FilmzViewModel: ObservableObject {
+    private let imdbService = IMDBService()
     @Published var searchResults: [IMDBService.SearchResult] = []
     @Published var isSearching = false
-    @Published var errorMessage: String?
+    @Published var searchError: Error?
     
-    private let imdbService: IMDBService
-    
-    init(imdbService: IMDBService = IMDBService(apiKey: "1b5a29bf")) {
-        self.imdbService = imdbService
-    }
-    
-    func searchFilms(query: String) {
-        // Only reset results if query is empty
-        guard !query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+    func search(_ query: String) {
+        guard !query.isEmpty else {
             searchResults = []
             return
         }
         
+        isSearching = true
+        searchError = nil
+        
         Task {
-            isSearching = true
             do {
-                searchResults = try await imdbService.searchMovies(query: query)
-                errorMessage = nil
+                searchResults = try await imdbService.searchMovies(query)
+                isSearching = false
             } catch {
                 searchResults = []
-                errorMessage = "Failed to search: \(error.localizedDescription)"
+                searchError = error
+                isSearching = false
             }
-            isSearching = false
         }
     }
 }
