@@ -76,7 +76,7 @@ class FilmStore: ObservableObject {
     }
     
     func addFilm(_ film: Film) async {
-        print("Adding film: \(film.title)")
+        log("Starting to add film: \(film.title)")
         let record = CKRecord(recordType: "Film")
         
         // Set all fields
@@ -97,10 +97,33 @@ class FilmStore: ObservableObject {
         
         do {
             let savedRecord = try await database.save(record)
-            print("Successfully saved record with ID: \(savedRecord.recordID)")
-            films.append(film)
+            log("Successfully saved record with ID: \(savedRecord.recordID)")
+            
+            await MainActor.run {
+                self.films.append(film)
+            }
+            
+            // Check iCloud status after saving
+            checkICloudStatus()
+            
+        } catch let error as CKError {
+            log("CloudKit error saving film", error: error)
+            switch error.code {
+            case .notAuthenticated:
+                log("User is not authenticated with iCloud")
+            case .networkFailure:
+                log("Network connection failed")
+            case .networkUnavailable:
+                log("Network is unavailable")
+            case .serverResponseLost:
+                log("Server response was lost")
+            case .serverRejectedRequest:
+                log("Server rejected the request")
+            default:
+                log("Other CloudKit error: \(error.localizedDescription)")
+            }
         } catch {
-            print("Failed to save film with error: \(error)")
+            log("Non-CloudKit error saving film", error: error)
         }
     }
     
