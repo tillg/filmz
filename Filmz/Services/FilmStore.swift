@@ -110,7 +110,7 @@ class FilmStore: ObservableObject {
             }
             
             // Check iCloud status after saving
-            //checkICloudStatus()
+            checkICloudStatus()
             
         } catch let error as CKError {
             logger.info("CloudKit error saving film error: \(error)")
