@@ -1,6 +1,7 @@
 import CloudKit
 import Foundation
 import UIKit
+import OSLog
 
 @MainActor
 class FilmStore: ObservableObject {
@@ -8,36 +9,37 @@ class FilmStore: ObservableObject {
     @Published private(set) var iCloudStatus: String = ""
     private let container: CKContainer
     private let database: CKDatabase
+    private let logger = Logger()
     
     init() {
         container = CKContainer(identifier: "iCloud.com.grtnr.Filmz")
         database = container.privateCloudDatabase
         
-        log("FilmStore initialized")
+        logger.info("FilmStore initialized")
         
         // Check CloudKit availability
         Task {
             do {
                 let accountStatus = try await container.accountStatus()
-                log("CloudKit account status: \(accountStatus.rawValue)")
+                logger.info("CloudKit account status: \(accountStatus.rawValue)")
                 
                 switch accountStatus {
                 case .available:
-                    log("CloudKit is available, loading films...")
+                    logger.info("CloudKit is available, loading films...")
                     await loadFilms()
                 case .noAccount:
-                    log("⚠️ No iCloud account found")
+                    logger.error("⚠️ No iCloud account found")
                 case .restricted:
-                    log("⚠️ iCloud access is restricted")
+                    logger.error("⚠️ iCloud access is restricted")
                 case .couldNotDetermine:
-                    log("⚠️ Could not determine iCloud status")
+                    logger.error("⚠️ Could not determine iCloud status")
                 case .temporarilyUnavailable:
-                    log("⚠️ iCloud temporarily unavailable")
+                    logger.error("⚠️ iCloud temporarily unavailable")
                 @unknown default:
-                    log("⚠️ Unknown iCloud status: \(accountStatus.rawValue)")
+                    logger.error("⚠️ Unknown iCloud status: \(accountStatus.rawValue)")
                 }
             } catch {
-                log("❌ Failed to check CloudKit status", error: error)
+                logger.error("❌ Failed to check CloudKit status")
             }
         }
     }
@@ -80,7 +82,7 @@ class FilmStore: ObservableObject {
     }
     
     func addFilm(_ film: Film) async {
-        log("Starting to add film: \(film.title)")
+        logger.info("Starting to add film: \(film.title)")
         let record = CKRecord(recordType: "Film")
         
         // Set all fields
@@ -101,7 +103,7 @@ class FilmStore: ObservableObject {
         
         do {
             let savedRecord = try await database.save(record)
-            log("Successfully saved record with ID: \(savedRecord.recordID)")
+            logger.info("Successfully saved record with ID: \(savedRecord.recordID)")
             
             await MainActor.run {
                 self.films.append(film)
@@ -111,23 +113,9 @@ class FilmStore: ObservableObject {
             //checkICloudStatus()
             
         } catch let error as CKError {
-            log("CloudKit error saving film", error: error)
-            switch error.code {
-            case .notAuthenticated:
-                log("User is not authenticated with iCloud")
-            case .networkFailure:
-                log("Network connection failed")
-            case .networkUnavailable:
-                log("Network is unavailable")
-            case .serverResponseLost:
-                log("Server response was lost")
-            case .serverRejectedRequest:
-                log("Server rejected the request")
-            default:
-                log("Other CloudKit error: \(error.localizedDescription)")
-            }
+            logger.info("CloudKit error saving film error: \(error)")
         } catch {
-            log("Non-CloudKit error saving film", error: error)
+            logger.error("Non-CloudKit error saving film error: \(error)")
         }
     }
     
@@ -195,35 +183,6 @@ class FilmStore: ObservableObject {
         }
     }
     
-    // Change from private to internal
-    func log(_ message: String, error: Error? = nil) {
-        let timestamp = DateFormatter.localizedString(from: Date(), dateStyle: .none, timeStyle: .medium)
-        let logMessage = """
-            [Filmz \(timestamp)]
-            Message: \(message)
-            Device: \(UIDevice.current.model)
-            iOS: \(UIDevice.current.systemVersion)
-            Memory: \(ProcessInfo.processInfo.physicalMemory / 1024 / 1024)MB
-            Error: \(error?.localizedDescription ?? "none")
-            """
-        print(logMessage)
-        
-        // Save to CloudKit for remote debugging
-        Task {
-            do {
-                let record = CKRecord(recordType: "AppLog")
-                record["message"] = logMessage
-                record["timestamp"] = Date()
-                record["device"] = UIDevice.current.model
-                record["ios_version"] = UIDevice.current.systemVersion
-                try await database.save(record)
-            } catch {
-                print("Failed to save log: \(error.localizedDescription)")
-            }
-        }
-    }
-    
-    // Add logging to key operations
     func fetchFilms() async {
         do {
             // Create a query to fetch all films
@@ -237,7 +196,7 @@ class FilmStore: ObservableObject {
                     let record = try result.1.get()
                     return Film.from(record: record)
                 } catch {
-                    log("Failed to process record", error: error)
+                    logger.error("Failed to process record error: \(error)")
                     return nil
                 }
             }
@@ -245,9 +204,9 @@ class FilmStore: ObservableObject {
             await MainActor.run {
                 self.films = films
             }
-            log("Successfully fetched \(films.count) films")
+            logger.info("Successfully fetched \(films.count) films")
         } catch {
-            log("Failed to fetch films", error: error)
+            logger.error("Failed to fetch films error: \(error)")
         }
     }
     
@@ -268,7 +227,7 @@ class FilmStore: ObservableObject {
                 @unknown default:
                     self?.iCloudStatus = "Unknown iCloud status: \(status.rawValue)"
                 }
-                self?.log("iCloud Status: \(self?.iCloudStatus ?? "")")
+                self?.logger.info("iCloud Status: \(self?.iCloudStatus ?? "")")
             }
         }
     }

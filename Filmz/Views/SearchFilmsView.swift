@@ -1,7 +1,10 @@
 import SwiftUI
+import OSLog
 
 struct SearchFilmsView: View {
     let filmStore: FilmStore
+    private let logger = Logger()
+
     @Environment(\.dismiss) private var dismiss
     @StateObject private var viewModel = FilmzViewModel()
     @State private var searchText = ""
@@ -55,10 +58,10 @@ struct SearchFilmsView: View {
             }
         }
         .onAppear {
-            filmStore.log("SearchFilmsView appeared")
+            logger.info("SearchFilmsView appeared")
         }
         .onDisappear {
-            filmStore.log("SearchFilmsView disappeared")
+            logger.info("SearchFilmsView disappeared")
         }
     }
 } 
