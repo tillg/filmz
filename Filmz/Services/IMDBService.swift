@@ -24,6 +24,13 @@ actor IMDBService {
         var id: String { imdbID }
     }
     
+    struct SearchState {
+        let query: String
+        let totalResults: Int
+        let currentPage: Int
+        let results: [SearchResult]
+    }
+    
     struct DetailResponse: Codable {
         let Title: String
         let Year: String
@@ -45,22 +52,18 @@ actor IMDBService {
         let Value: String
     }
     
-    func searchMovies(_ query: String) async throws -> [SearchResult] {
-        // Clean and validate the query
+    func searchMovies(_ query: String, page: Int = 1) async throws -> SearchState {
         let cleanedQuery = query.trimmingCharacters(in: .whitespacesAndNewlines)
         
-        // Only search if we have at least 2 non-whitespace characters
         guard cleanedQuery.count >= 2 else {
-            return []
+            return SearchState(query: cleanedQuery, totalResults: 0, currentPage: page, results: [])
         }
         
-        // Encode the cleaned query
         guard let encodedQuery = cleanedQuery.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) else {
-            return []
+            return SearchState(query: cleanedQuery, totalResults: 0, currentPage: page, results: [])
         }
         
-        // Construct URL with proper parameters and type to include both movies and series
-        let url = URL(string: "\(baseUrl)?apikey=\(apiKey)&s=\(encodedQuery)")!
+        let url = URL(string: "\(baseUrl)?apikey=\(apiKey)&s=\(encodedQuery)&page=\(page)")!
         print("Search URL: \(url)")
         
         let (data, _) = try await URLSession.shared.data(from: url)
@@ -73,8 +76,13 @@ actor IMDBService {
                 userInfo: [NSLocalizedDescriptionKey: response.Error ?? "Movie not found!"]
             )
         }
-        
-        return response.Search ?? []
+        print("Number of entries found: \(response.totalResults)")
+        return SearchState(
+            query: cleanedQuery,
+            totalResults: Int(response.totalResults ?? "0") ?? 0,
+            currentPage: page,
+            results: response.Search ?? []
+        )
     }
     
     func fetchMovieDetails(imdbId: String) async throws -> DetailResponse {

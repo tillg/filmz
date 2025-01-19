@@ -9,7 +9,7 @@ struct SearchFilmsView: View {
     var body: some View {
         NavigationView {
             List {
-                if viewModel.isSearching {
+                if viewModel.isSearching && viewModel.searchResults.isEmpty {
                     ProgressView()
                         .frame(maxWidth: .infinity)
                 } else if let error = viewModel.searchError {
@@ -21,6 +21,22 @@ struct SearchFilmsView: View {
                             AddFilmView(imdbResult: result, filmStore: filmStore, dismiss: dismiss)
                         } label: {
                             SearchResultRow(result: result)
+                        }
+                    }
+                    
+                    if viewModel.canLoadMore {
+                        Button {
+                            Task {
+                                await viewModel.loadMore()
+                            }
+                        } label: {
+                            HStack {
+                                Text("Load More")
+                                if viewModel.isSearching {
+                                    ProgressView()
+                                }
+                            }
+                            .frame(maxWidth: .infinity)
                         }
                     }
                 }

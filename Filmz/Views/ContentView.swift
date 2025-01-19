@@ -3,21 +3,15 @@ import SwiftUI
 struct ContentView: View {
     @StateObject private var filmStore = FilmStore()
     @State private var showingSearch = false
+    @State private var watchFilter: FilmListView.WatchFilter = .all
     
     var body: some View {
         NavigationView {
-            List {
-                ForEach(filmStore.films) { film in
-                    FilmRow(film: film, filmStore: filmStore)
-                }
-                .onDelete { indexSet in
-                    for index in indexSet {
-                        Task {
-                            await filmStore.deleteFilm(filmStore.films[index])
-                        }
-                    }
-                }
-            }
+            FilmListView(
+                films: filmStore.films,
+                filmStore: filmStore,
+                watchFilter: $watchFilter
+            )
             .navigationTitle("My Filmz")
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
