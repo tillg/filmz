@@ -4,6 +4,7 @@ struct FilmListView: View {
     let films: [Film]
     let filmStore: FilmStore
     @Binding var watchFilter: WatchFilter
+    @State private var selectedGenre: String?
     
     enum WatchFilter {
         case all, watched, unwatched
@@ -17,19 +18,35 @@ struct FilmListView: View {
         }
     }
     
+    var availableGenres: [String] {
+        // Get unique genres from all films
+        let genres = Set(films.flatMap { $0.genres }).sorted()
+        return genres
+    }
+    
     var filteredFilms: [Film] {
+        var filtered = films
+        
+        // Apply watch filter
         switch watchFilter {
-        case .all:
-            return films
+        case .all: break
         case .watched:
-            return films.filter { $0.watched }
+            filtered = filtered.filter { $0.watched }
         case .unwatched:
-            return films.filter { !$0.watched }
+            filtered = filtered.filter { !$0.watched }
         }
+        
+        // Apply genre filter if selected
+        if let genre = selectedGenre {
+            filtered = filtered.filter { $0.genres.contains(genre) }
+        }
+        
+        return filtered
     }
     
     var body: some View {
-        VStack {
+        VStack(spacing: 0) {
+            // Watch Status Filter
             Picker("Filter", selection: $watchFilter) {
                 ForEach([WatchFilter.all, .watched, .unwatched], id: \.title) { filter in
                     Text(filter.title).tag(filter)
@@ -37,6 +54,33 @@ struct FilmListView: View {
             }
             .pickerStyle(.segmented)
             .padding()
+            
+            // Genre Filter
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack {
+                    Button(action: { selectedGenre = nil }) {
+                        Text("All Genres")
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 6)
+                            .background(selectedGenre == nil ? Color.accentColor : Color.gray.opacity(0.2))
+                            .foregroundColor(selectedGenre == nil ? .white : .primary)
+                            .cornerRadius(16)
+                    }
+                    
+                    ForEach(availableGenres, id: \.self) { genre in
+                        Button(action: { selectedGenre = genre }) {
+                            Text(genre)
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 6)
+                                .background(selectedGenre == genre ? Color.accentColor : Color.gray.opacity(0.2))
+                                .foregroundColor(selectedGenre == genre ? .white : .primary)
+                                .cornerRadius(16)
+                        }
+                    }
+                }
+                .padding(.horizontal)
+            }
+            .padding(.bottom)
             
             List {
                 ForEach(filteredFilms) { film in

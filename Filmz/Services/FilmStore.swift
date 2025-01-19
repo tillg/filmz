@@ -1,9 +1,11 @@
 import CloudKit
 import Foundation
+import UIKit
 
 @MainActor
 class FilmStore: ObservableObject {
     @Published private(set) var films: [Film] = []
+    @Published private(set) var iCloudStatus: String = ""
     private let container: CKContainer
     private let database: CKDatabase
     
@@ -163,6 +165,75 @@ class FilmStore: ObservableObject {
             }
         } catch {
             print("Failed to update film: \(error)")
+        }
+    }
+    
+    // Add a logging function
+    private func log(_ message: String, error: Error? = nil) {
+        let logMessage = """
+            [Filmz] \(message)
+            Device: \(UIDevice.current.model)
+            iOS: \(UIDevice.current.systemVersion)
+            Error: \(error?.localizedDescription ?? "none")
+            """
+        print(logMessage)
+        
+        // Also save to CloudKit for remote debugging
+        let record = CKRecord(recordType: "AppLog")
+        record["message"] = logMessage
+        record["timestamp"] = Date()
+        record["device"] = UIDevice.current.model
+        
+        Task {
+            try? await database.save(record)
+        }
+    }
+    
+    // Add logging to key operations
+    func fetchFilms() async {
+        do {
+            // Create a query to fetch all films
+            let query = CKQuery(recordType: "Film", predicate: .init(value: true))
+            let descriptor = NSSortDescriptor(key: "title", ascending: true)
+            query.sortDescriptors = [descriptor]
+            
+            let (matchResults, _) = try await database.records(matching: query)
+            let films = matchResults.compactMap { result -> Film? in
+                do {
+                    let record = try result.1.get()
+                    return Film.from(record: record)
+                } catch {
+                    log("Failed to process record", error: error)
+                    return nil
+                }
+            }
+            
+            await MainActor.run {
+                self.films = films
+            }
+            log("Successfully fetched \(films.count) films")
+        } catch {
+            log("Failed to fetch films", error: error)
+        }
+    }
+    
+    private func checkICloudStatus() {
+        CKContainer.default().accountStatus { [weak self] status, error in
+            DispatchQueue.main.async {
+                switch status {
+                case .available:
+                    self?.iCloudStatus = "iCloud Available"
+                case .noAccount:
+                    self?.iCloudStatus = "No iCloud Account"
+                case .restricted:
+                    self?.iCloudStatus = "iCloud Restricted"
+                case .couldNotDetermine:
+                    self?.iCloudStatus = "Could not determine iCloud status: \(error?.localizedDescription ?? "")"
+                @unknown default:
+                    self?.iCloudStatus = "Unknown iCloud status"
+                }
+                self?.log("iCloud Status: \(self?.iCloudStatus ?? "")")
+            }
         }
     }
 }
