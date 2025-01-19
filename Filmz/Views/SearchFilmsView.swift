@@ -43,8 +43,8 @@ struct SearchFilmsView: View {
             }
             .navigationTitle("Add Film")
             .searchable(text: $searchText)
-            .onChange(of: searchText) { query in
-                viewModel.search(query)
+            .onChange(of: searchText) { oldValue, newValue in
+                viewModel.search(newValue)
             }
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
@@ -53,6 +53,12 @@ struct SearchFilmsView: View {
                     }
                 }
             }
+        }
+        .onAppear {
+            filmStore.log("SearchFilmsView appeared")
+        }
+        .onDisappear {
+            filmStore.log("SearchFilmsView disappeared")
         }
     }
 } 

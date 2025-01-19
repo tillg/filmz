@@ -64,7 +64,7 @@ actor IMDBService {
         }
         
         let url = URL(string: "\(baseUrl)?apikey=\(apiKey)&s=\(encodedQuery)&page=\(page)")!
-        print("Search URL: \(url)")
+        print("Search URL: \(url.absoluteString)")
         
         let (data, _) = try await URLSession.shared.data(from: url)
         let response = try JSONDecoder().decode(SearchResponse.self, from: data)
@@ -76,7 +76,7 @@ actor IMDBService {
                 userInfo: [NSLocalizedDescriptionKey: response.Error ?? "Movie not found!"]
             )
         }
-        print("Number of entries found: \(response.totalResults)")
+        print("Number of entries found: \(response.totalResults ?? "0")")
         return SearchState(
             query: cleanedQuery,
             totalResults: Int(response.totalResults ?? "0") ?? 0,

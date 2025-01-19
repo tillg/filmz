@@ -13,6 +13,9 @@ struct AddFilmView: View {
     @State private var streamingService = ""
     @State private var recommendedBy = ""
     @State private var audience = Film.AudienceType.alone
+    @State private var film: Film?
+    @State private var showingError = false
+    @State private var error: Error?
     
     var body: some View {
         Form {
@@ -72,20 +75,44 @@ struct AddFilmView: View {
                 Button(action: {
                     isLoading = true
                     Task {
-                        do {
-                            // Create film with basic info first
-                            var film = Film(
-                                title: imdbResult.Title,
-                                year: imdbResult.Year,
-                                genres: genres,
-                                imdbRating: 0.0,
-                                posterUrl: imdbResult.Poster,
-                                description: "",
-                                country: "",
-                                language: "",
+                        // Create film with basic info first
+                        let film = Film(
+                            title: imdbResult.Title,
+                            year: imdbResult.Year,
+                            genres: genres,
+                            imdbRating: 0.0,
+                            posterUrl: imdbResult.Poster,
+                            description: "",
+                            country: "",
+                            language: "",
+                            releaseDate: Date(),
+                            runtime: 0,
+                            plot: "",
+                            recommendedBy: recommendedBy,
+                            intendedAudience: audience,
+                            watched: watchStatus,
+                            watchDate: watchStatus ? watchDate : nil,
+                            streamingService: watchStatus ? streamingService : nil
+                        )
+                        
+                        // Save the film first
+                        await filmStore.addFilm(film)
+                        
+                        // Then try to fetch and update additional details
+                        if let details = try? await imdbService.fetchMovieDetails(imdbId: imdbResult.imdbID) {
+                            // Update with full details
+                            let updatedFilm = Film(
+                                title: details.Title,
+                                year: details.Year,
+                                genres: details.Genre.components(separatedBy: ", "),
+                                imdbRating: Double(details.imdbRating) ?? 0.0,
+                                posterUrl: details.Poster,
+                                description: details.Plot,
+                                country: details.Country,
+                                language: details.Language,
                                 releaseDate: Date(),
-                                runtime: 0,
-                                plot: "",
+                                runtime: Int(details.Runtime.replacingOccurrences(of: " min", with: "")) ?? 0,
+                                plot: details.Plot,
                                 recommendedBy: recommendedBy,
                                 intendedAudience: audience,
                                 watched: watchStatus,
@@ -93,43 +120,17 @@ struct AddFilmView: View {
                                 streamingService: watchStatus ? streamingService : nil
                             )
                             
-                            // Save the film first
-                            await filmStore.addFilm(film)
-                            
-                            // Then try to fetch and update additional details
-                            if let details = try? await imdbService.fetchMovieDetails(imdbId: imdbResult.imdbID) {
-                                // Update with full details
-                                film = Film(
-                                    title: details.Title,
-                                    year: details.Year,
-                                    genres: details.Genre.components(separatedBy: ", "),
-                                    imdbRating: Double(details.imdbRating) ?? 0.0,
-                                    posterUrl: details.Poster,
-                                    description: details.Plot,
-                                    country: details.Country,
-                                    language: details.Language,
-                                    releaseDate: Date(),
-                                    runtime: Int(details.Runtime.replacingOccurrences(of: " min", with: "")) ?? 0,
-                                    plot: details.Plot,
-                                    recommendedBy: recommendedBy,
-                                    intendedAudience: audience,
-                                    watched: watchStatus,
-                                    watchDate: watchStatus ? watchDate : nil,
-                                    streamingService: watchStatus ? streamingService : nil
-                                )
-                                await filmStore.updateFilm(film, with: EditedFilmData(
-                                    genres: film.genres,
-                                    recommendedBy: film.recommendedBy ?? "",
-                                    intendedAudience: film.intendedAudience,
-                                    watched: watchStatus,
-                                    watchDate: watchStatus ? watchDate : nil,
-                                    streamingService: watchStatus ? streamingService : nil
-                                ))
-                            }
-                            dismiss()
-                        } catch {
-                            print("Error saving film: \(error)")
+                            await filmStore.updateFilm(updatedFilm, with: EditedFilmData(
+                                genres: updatedFilm.genres,
+                                recommendedBy: updatedFilm.recommendedBy ?? "",
+                                intendedAudience: updatedFilm.intendedAudience,
+                                watched: watchStatus,
+                                watchDate: watchStatus ? watchDate : nil,
+                                streamingService: watchStatus ? streamingService : nil
+                            ))
                         }
+                        
+                        dismiss()
                         isLoading = false
                     }
                 }) {
@@ -149,6 +150,50 @@ struct AddFilmView: View {
             if let details = try? await imdbService.fetchMovieDetails(imdbId: imdbResult.imdbID) {
                 genres = details.Genre.components(separatedBy: ", ")
             }
+        }
+        .task {
+            // Remove the do-catch since Film initialization doesn't throw
+            let details = try? await IMDBService().fetchMovieDetails(imdbId: imdbResult.imdbID)
+            
+            if let details = details {
+                // Convert IMDb rating to Double
+                let rating = Double(details.imdbRating) ?? 0.0
+                
+                // Parse genres
+                let genres = details.Genre.components(separatedBy: ", ")
+                
+                // Parse runtime to minutes
+                let runtime = details.Runtime.components(separatedBy: " ").first.flatMap(Int.init) ?? 0
+                
+                film = Film(
+                    title: details.Title,
+                    year: details.Year,
+                    genres: genres,
+                    imdbRating: rating,
+                    posterUrl: details.Poster,
+                    description: details.Plot,
+                    country: details.Country,
+                    language: details.Language,
+                    releaseDate: Date(),
+                    runtime: runtime,
+                    plot: details.Plot,
+                    recommendedBy: recommendedBy,
+                    intendedAudience: audience,
+                    watched: watchStatus,
+                    watchDate: watchStatus ? watchDate : nil,
+                    streamingService: watchStatus ? streamingService : nil
+                )
+            } else {
+                error = NSError(domain: "AddFilmView", code: 1, userInfo: [NSLocalizedDescriptionKey: "Failed to load film details"])
+                showingError = true
+            }
+            
+            isLoading = false
+        }
+        .alert("Error", isPresented: $showingError) {
+            Button("OK") {}
+        } message: {
+            Text(error?.localizedDescription ?? "Unknown error")
         }
     }
 } 

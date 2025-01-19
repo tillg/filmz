@@ -13,27 +13,31 @@ class FilmStore: ObservableObject {
         container = CKContainer(identifier: "iCloud.com.grtnr.Filmz")
         database = container.privateCloudDatabase
         
+        log("FilmStore initialized")
+        
         // Check CloudKit availability
         Task {
             do {
                 let accountStatus = try await container.accountStatus()
-                print("CloudKit account status: \(accountStatus.rawValue)")
+                log("CloudKit account status: \(accountStatus.rawValue)")
                 
                 switch accountStatus {
                 case .available:
-                    print("CloudKit is available, loading films...")
+                    log("CloudKit is available, loading films...")
                     await loadFilms()
                 case .noAccount:
-                    print("No iCloud account found. Please sign in to iCloud in Settings")
+                    log("⚠️ No iCloud account found")
                 case .restricted:
-                    print("iCloud access is restricted")
+                    log("⚠️ iCloud access is restricted")
                 case .couldNotDetermine:
-                    print("Could not determine iCloud account status")
+                    log("⚠️ Could not determine iCloud status")
+                case .temporarilyUnavailable:
+                    log("⚠️ iCloud temporarily unavailable")
                 @unknown default:
-                    print("Unknown iCloud account status")
+                    log("⚠️ Unknown iCloud status: \(accountStatus.rawValue)")
                 }
             } catch {
-                print("Failed to check CloudKit status: \(error.localizedDescription)")
+                log("❌ Failed to check CloudKit status", error: error)
             }
         }
     }
@@ -191,24 +195,31 @@ class FilmStore: ObservableObject {
         }
     }
     
-    // Add a logging function
-    private func log(_ message: String, error: Error? = nil) {
+    // Change from private to internal
+    func log(_ message: String, error: Error? = nil) {
+        let timestamp = DateFormatter.localizedString(from: Date(), dateStyle: .none, timeStyle: .medium)
         let logMessage = """
-            [Filmz] \(message)
+            [Filmz \(timestamp)]
+            Message: \(message)
             Device: \(UIDevice.current.model)
             iOS: \(UIDevice.current.systemVersion)
+            Memory: \(ProcessInfo.processInfo.physicalMemory / 1024 / 1024)MB
             Error: \(error?.localizedDescription ?? "none")
             """
         print(logMessage)
         
-        // Also save to CloudKit for remote debugging
-        let record = CKRecord(recordType: "AppLog")
-        record["message"] = logMessage
-        record["timestamp"] = Date()
-        record["device"] = UIDevice.current.model
-        
+        // Save to CloudKit for remote debugging
         Task {
-            try? await database.save(record)
+            do {
+                let record = CKRecord(recordType: "AppLog")
+                record["message"] = logMessage
+                record["timestamp"] = Date()
+                record["device"] = UIDevice.current.model
+                record["ios_version"] = UIDevice.current.systemVersion
+                try await database.save(record)
+            } catch {
+                print("Failed to save log: \(error.localizedDescription)")
+            }
         }
     }
     
@@ -252,8 +263,10 @@ class FilmStore: ObservableObject {
                     self?.iCloudStatus = "iCloud Restricted"
                 case .couldNotDetermine:
                     self?.iCloudStatus = "Could not determine iCloud status: \(error?.localizedDescription ?? "")"
+                case .temporarilyUnavailable:
+                    self?.iCloudStatus = "iCloud Temporarily Unavailable"
                 @unknown default:
-                    self?.iCloudStatus = "Unknown iCloud status"
+                    self?.iCloudStatus = "Unknown iCloud status: \(status.rawValue)"
                 }
                 self?.log("iCloud Status: \(self?.iCloudStatus ?? "")")
             }
