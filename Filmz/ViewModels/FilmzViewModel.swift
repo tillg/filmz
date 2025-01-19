@@ -14,8 +14,8 @@ class FilmzViewModel: ObservableObject {
     }
     
     func searchFilms(query: String) {
-        // Reset results if query is too short
-        guard query.count >= 3 else {
+        // Only reset results if query is empty
+        guard !query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
             searchResults = []
             return
         }

@@ -46,7 +46,11 @@ actor IMDBService {
     }
     
     func searchMovies(query: String) async throws -> [SearchResult] {
-        guard let encodedQuery = query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
+        // Clean up and prepare the search query
+        let cleanedQuery = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        
+        guard !cleanedQuery.isEmpty,
+              let encodedQuery = cleanedQuery.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
               let url = URL(string: "\(baseUrl)?apikey=\(apiKey)&s=\(encodedQuery)") else {
             throw URLError(.badURL)
         }

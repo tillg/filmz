@@ -2,6 +2,8 @@ import SwiftUI
 
 struct AddFilmView: View {
     let imdbResult: IMDBService.SearchResult
+    let filmStore: FilmStore
+    let dismiss: DismissAction
     
     @State private var selectedGenres: Set<String> = []
     @State private var watchStatus = false
@@ -70,7 +72,25 @@ struct AddFilmView: View {
             
             Section {
                 Button("Save") {
-                    // TODO: Implement save functionality
+                    let film = Film(
+                        title: imdbResult.Title,
+                        year: Int(imdbResult.Year.prefix(4)) ?? 0,
+                        genres: Array(selectedGenres),
+                        imdbRating: 0.0, // TODO: Fetch from detail API
+                        posterUrl: imdbResult.Poster,
+                        description: "", // TODO: Fetch from detail API
+                        country: "", // TODO: Fetch from detail API
+                        language: "", // TODO: Fetch from detail API
+                        releaseDate: Date(), // TODO: Parse from detail API
+                        runtime: 0, // TODO: Fetch from detail API
+                        plot: "", // TODO: Fetch from detail API
+                        recommendedBy: recommendedBy,
+                        intendedAudience: audience
+                    )
+                    Task {
+                        await filmStore.addFilm(film)
+                        dismiss()
+                    }
                 }
                 .frame(maxWidth: .infinity)
             }
