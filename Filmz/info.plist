@@ -5,6 +5,9 @@
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict/>
+		<dict/>
 	</array>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 </dict>
 </plist>
