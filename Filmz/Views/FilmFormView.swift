@@ -24,12 +24,16 @@ struct FilmFormView: View {
         // Initialize state from existing film or defaults
         if let film = existingFilm {
             _selectedGenres = State(initialValue: Set(film.genres))
-            _watchStatus = State(initialValue: false) // TODO: Add to model
+            _watchStatus = State(initialValue: film.watched)
+            _watchDate = State(initialValue: film.watchDate)
+            _streamingService = State(initialValue: film.streamingService ?? "")
             _recommendedBy = State(initialValue: film.recommendedBy ?? "")
             _audience = State(initialValue: film.intendedAudience)
         } else {
             _selectedGenres = State(initialValue: Set())
             _watchStatus = State(initialValue: false)
+            _watchDate = State(initialValue: nil)
+            _streamingService = State(initialValue: "")
             _recommendedBy = State(initialValue: "")
             _audience = State(initialValue: .alone)
         }
@@ -57,17 +61,30 @@ struct FilmFormView: View {
             }
             
             Section("Genres") {
-                ForEach(availableGenres, id: \.self) { genre in
-                    Toggle(genre, isOn: Binding(
-                        get: { selectedGenres.contains(genre) },
-                        set: { isSelected in
-                            if isSelected {
-                                selectedGenres.insert(genre)
-                            } else {
-                                selectedGenres.remove(genre)
+                if existingFilm != nil {
+                    // Show pills for existing film
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack {
+                            ForEach(Array(selectedGenres), id: \.self) { genre in
+                                GenrePill(genre: genre)
                             }
                         }
-                    ))
+                        .padding(.horizontal)
+                    }
+                } else {
+                    // Show toggles for new film
+                    ForEach(availableGenres, id: \.self) { genre in
+                        Toggle(genre, isOn: Binding(
+                            get: { selectedGenres.contains(genre) },
+                            set: { isSelected in
+                                if isSelected {
+                                    selectedGenres.insert(genre)
+                                } else {
+                                    selectedGenres.remove(genre)
+                                }
+                            }
+                        ))
+                    }
                 }
             }
             
@@ -101,7 +118,10 @@ struct FilmFormView: View {
                             await filmStore.updateFilm(film, with: EditedFilmData(
                                 genres: Array(selectedGenres),
                                 recommendedBy: recommendedBy,
-                                intendedAudience: audience
+                                intendedAudience: audience,
+                                watched: watchStatus,
+                                watchDate: watchStatus ? watchDate : nil,
+                                streamingService: watchStatus ? streamingService : nil
                             ))
                         } else if let result = imdbResult {
                             let film = Film(
@@ -117,7 +137,10 @@ struct FilmFormView: View {
                                 runtime: 0,
                                 plot: "",
                                 recommendedBy: recommendedBy,
-                                intendedAudience: audience
+                                intendedAudience: audience,
+                                watched: watchStatus,
+                                watchDate: watchStatus ? watchDate : nil,
+                                streamingService: watchStatus ? streamingService : nil
                             )
                             await filmStore.addFilm(film)
                         }

@@ -5,7 +5,7 @@ struct FilmRow: View {
     let filmStore: FilmStore
     
     var body: some View {
-        NavigationLink(destination: EditFilmView(film: film, filmStore: filmStore)) {
+        NavigationLink(destination: FilmFormView(filmStore: filmStore, existingFilm: film)) {
             HStack {
                 AsyncImage(url: URL(string: film.posterUrl)) { image in
                     image
@@ -21,9 +21,34 @@ struct FilmRow: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(film.title)
                         .font(.headline)
-                    Text(film.year)
-                        .font(.subheadline)
+                    HStack(spacing: 4) {
+                        Text(film.year)
+                        Text("•")
+                    }
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    
+                    FlowLayout(spacing: 4) {
+                        ForEach(film.genres, id: \.self) { genre in
+                            GenrePill(genre: genre)
+                        }
+                    }
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    
+                    if film.watched {
+                        HStack(spacing: 4) {
+                            Image(systemName: "checkmark.circle.fill")
+                                .foregroundStyle(.green)
+                            if let watchDate = film.watchDate {
+                                Text("Watched on \(watchDate.formatted(date: .abbreviated, time: .omitted))")
+                            } else {
+                                Text("Watched")
+                            }
+                        }
+                        .font(.caption)
                         .foregroundStyle(.secondary)
+                    }
                 }
                 
                 Spacer()

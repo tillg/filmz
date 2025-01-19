@@ -89,6 +89,9 @@ class FilmStore: ObservableObject {
         record["plot"] = film.plot
         record["recommendedBy"] = film.recommendedBy ?? ""
         record["intendedAudience"] = film.intendedAudience.rawValue
+        record["watched"] = film.watched
+        record["watchDate"] = film.watchDate
+        record["streamingService"] = film.streamingService
         
         do {
             let savedRecord = try await database.save(record)
@@ -129,6 +132,9 @@ class FilmStore: ObservableObject {
                 record["genres"] = data.genres
                 record["recommendedBy"] = data.recommendedBy
                 record["intendedAudience"] = data.intendedAudience.rawValue
+                record["watched"] = data.watched
+                record["watchDate"] = data.watchDate
+                record["streamingService"] = data.streamingService
                 
                 let updatedRecord = try await database.save(record)
                 print("Successfully updated record with ID: \(updatedRecord.recordID)")
@@ -148,7 +154,10 @@ class FilmStore: ObservableObject {
                         runtime: film.runtime,
                         plot: film.plot,
                         recommendedBy: data.recommendedBy,
-                        intendedAudience: data.intendedAudience
+                        intendedAudience: data.intendedAudience,
+                        watched: data.watched,
+                        watchDate: data.watchDate,
+                        streamingService: data.streamingService
                     )
                 }
             }
@@ -161,34 +170,34 @@ class FilmStore: ObservableObject {
 // Helper extension to convert between CKRecord and Film
 extension Film {
     static func from(record: CKRecord) -> Film? {
+        // Only require the absolute minimum fields
         guard 
             let title = record["title"] as? String,
-            let year = record["year"] as? String,
-            let genres = record["genres"] as? [String],
-            let posterUrl = record["posterUrl"] as? String,
-            let description = record["description"] as? String,
-            let country = record["country"] as? String,
-            let language = record["language"] as? String,
-            let runtime = record["runtime"] as? Int,
-            let plot = record["plot"] as? String,
-            let audienceRaw = record["intendedAudience"] as? String,
-            let audience = AudienceType(rawValue: audienceRaw)
-        else { return nil }
+            let year = record["year"] as? String
+        else { 
+            print("Failed to load film: missing required fields (title or year)")
+            return nil 
+        }
         
+        // All other fields are optional with defaults
         return Film(
+            id: UUID(),  // Generate new ID if needed
             title: title,
             year: year,
-            genres: genres,
+            genres: record["genres"] as? [String] ?? [],
             imdbRating: 0.0,
-            posterUrl: posterUrl,
-            description: description,
-            country: country,
-            language: language,
-            releaseDate: Date(),
-            runtime: runtime,
-            plot: plot,
-            recommendedBy: record["recommendedBy"] as? String ?? "",
-            intendedAudience: audience
+            posterUrl: record["posterUrl"] as? String ?? "",
+            description: record["description"] as? String ?? "",
+            country: record["country"] as? String ?? "",
+            language: record["language"] as? String ?? "",
+            releaseDate: record["releaseDate"] as? Date ?? Date(),
+            runtime: record["runtime"] as? Int ?? 0,
+            plot: record["plot"] as? String ?? "",
+            recommendedBy: record["recommendedBy"] as? String,
+            intendedAudience: AudienceType(rawValue: record["intendedAudience"] as? String ?? "") ?? .alone,
+            watched: record["watched"] as? Bool ?? false,
+            watchDate: record["watchDate"] as? Date,
+            streamingService: record["streamingService"] as? String
         )
     }
 } 

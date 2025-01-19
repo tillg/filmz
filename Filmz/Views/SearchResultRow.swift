@@ -25,9 +25,6 @@ struct SearchResultRow: View {
             }
             
             Spacer()
-            
-            Image(systemName: "chevron.right")
-                .foregroundStyle(.gray)
         }
         .padding(.vertical, 4)
     }

@@ -20,6 +20,11 @@ struct Film: Identifiable, Codable {
     var recommendedBy: String?
     var intendedAudience: AudienceType
     
+    // Add new fields
+    var watched: Bool
+    var watchDate: Date?
+    var streamingService: String?
+    
     enum AudienceType: String, Codable {
         case alone = "Me alone"
         case partner = "Me and partner"
@@ -29,7 +34,7 @@ struct Film: Identifiable, Codable {
     init(
         id: UUID = UUID(),
         title: String,
-        year: String,  // Changed from Int to String
+        year: String,
         genres: [String],
         imdbRating: Double,
         posterUrl: String,
@@ -40,7 +45,10 @@ struct Film: Identifiable, Codable {
         runtime: Int,
         plot: String,
         recommendedBy: String?,
-        intendedAudience: AudienceType
+        intendedAudience: AudienceType,
+        watched: Bool = false,
+        watchDate: Date? = nil,
+        streamingService: String? = nil
     ) {
         self.id = id
         self.title = title
@@ -56,5 +64,8 @@ struct Film: Identifiable, Codable {
         self.plot = plot
         self.recommendedBy = recommendedBy
         self.intendedAudience = intendedAudience
+        self.watched = watched
+        self.watchDate = watchDate
+        self.streamingService = streamingService
     }
 } 

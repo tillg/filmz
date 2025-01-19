@@ -42,17 +42,13 @@ struct EditFilmView: View {
             }
             
             Section("Genres") {
-                ForEach(availableGenres, id: \.self) { genre in
-                    Toggle(genre, isOn: Binding(
-                        get: { selectedGenres.contains(genre) },
-                        set: { isSelected in
-                            if isSelected {
-                                selectedGenres.insert(genre)
-                            } else {
-                                selectedGenres.remove(genre)
-                            }
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack {
+                        ForEach(film.genres, id: \.self) { genre in
+                            GenrePill(genre: genre)
                         }
-                    ))
+                    }
+                    .padding(.horizontal)
                 }
             }
             
@@ -82,11 +78,13 @@ struct EditFilmView: View {
             Section {
                 Button("Save Changes") {
                     Task {
-                        // TODO: Implement update in FilmStore
                         await filmStore.updateFilm(film, with: EditedFilmData(
                             genres: Array(selectedGenres),
                             recommendedBy: recommendedBy,
-                            intendedAudience: audience
+                            intendedAudience: audience,
+                            watched: watchStatus,
+                            watchDate: watchStatus ? watchDate : nil,
+                            streamingService: watchStatus ? streamingService : nil
                         ))
                         dismiss()
                     }
@@ -102,5 +100,7 @@ struct EditedFilmData {
     let genres: [String]
     let recommendedBy: String
     let intendedAudience: Film.AudienceType
-    // TODO: Add more editable fields
+    let watched: Bool
+    let watchDate: Date?
+    let streamingService: String?
 } 

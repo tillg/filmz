@@ -4,15 +4,15 @@ struct AddFilmView: View {
     let imdbResult: IMDBService.SearchResult
     let filmStore: FilmStore
     let dismiss: DismissAction
+    private let imdbService = IMDBService()
     
-    @State private var selectedGenres: Set<String> = []
+    @State private var isLoading = false
+    @State private var genres: [String] = []
     @State private var watchStatus = false
     @State private var watchDate: Date?
     @State private var streamingService = ""
     @State private var recommendedBy = ""
     @State private var audience = Film.AudienceType.alone
-    
-    let availableGenres = ["Action", "Adventure", "Comedy", "Drama", "Horror", "Sci-Fi", "Thriller"]
     
     var body: some View {
         Form {
@@ -32,18 +32,16 @@ struct AddFilmView: View {
                 Text("Year: \(imdbResult.Year)")
             }
             
-            Section("Genres") {
-                ForEach(availableGenres, id: \.self) { genre in
-                    Toggle(genre, isOn: Binding(
-                        get: { selectedGenres.contains(genre) },
-                        set: { isSelected in
-                            if isSelected {
-                                selectedGenres.insert(genre)
-                            } else {
-                                selectedGenres.remove(genre)
+            if !genres.isEmpty {
+                Section("Genres") {
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack {
+                            ForEach(genres, id: \.self) { genre in
+                                GenrePill(genre: genre)
                             }
                         }
-                    ))
+                        .padding(.horizontal)
+                    }
                 }
             }
             
@@ -71,30 +69,86 @@ struct AddFilmView: View {
             }
             
             Section {
-                Button("Save") {
-                    let film = Film(
-                        title: imdbResult.Title,
-                        year: imdbResult.Year,
-                        genres: Array(selectedGenres),
-                        imdbRating: 0.0,
-                        posterUrl: imdbResult.Poster,
-                        description: "",
-                        country: "",
-                        language: "",
-                        releaseDate: Date(),
-                        runtime: 0,
-                        plot: "",
-                        recommendedBy: recommendedBy,
-                        intendedAudience: audience
-                    )
+                Button(action: {
+                    isLoading = true
                     Task {
-                        await filmStore.addFilm(film)
-                        dismiss()
+                        do {
+                            // Create film with basic info first
+                            var film = Film(
+                                title: imdbResult.Title,
+                                year: imdbResult.Year,
+                                genres: genres,
+                                imdbRating: 0.0,
+                                posterUrl: imdbResult.Poster,
+                                description: "",
+                                country: "",
+                                language: "",
+                                releaseDate: Date(),
+                                runtime: 0,
+                                plot: "",
+                                recommendedBy: recommendedBy,
+                                intendedAudience: audience,
+                                watched: watchStatus,
+                                watchDate: watchStatus ? watchDate : nil,
+                                streamingService: watchStatus ? streamingService : nil
+                            )
+                            
+                            // Save the film first
+                            await filmStore.addFilm(film)
+                            
+                            // Then try to fetch and update additional details
+                            if let details = try? await imdbService.fetchMovieDetails(imdbId: imdbResult.imdbID) {
+                                // Update with full details
+                                film = Film(
+                                    title: details.Title,
+                                    year: details.Year,
+                                    genres: details.Genre.components(separatedBy: ", "),
+                                    imdbRating: Double(details.imdbRating) ?? 0.0,
+                                    posterUrl: details.Poster,
+                                    description: details.Plot,
+                                    country: details.Country,
+                                    language: details.Language,
+                                    releaseDate: Date(),
+                                    runtime: Int(details.Runtime.replacingOccurrences(of: " min", with: "")) ?? 0,
+                                    plot: details.Plot,
+                                    recommendedBy: recommendedBy,
+                                    intendedAudience: audience,
+                                    watched: watchStatus,
+                                    watchDate: watchStatus ? watchDate : nil,
+                                    streamingService: watchStatus ? streamingService : nil
+                                )
+                                await filmStore.updateFilm(film, with: EditedFilmData(
+                                    genres: film.genres,
+                                    recommendedBy: film.recommendedBy ?? "",
+                                    intendedAudience: film.intendedAudience,
+                                    watched: watchStatus,
+                                    watchDate: watchStatus ? watchDate : nil,
+                                    streamingService: watchStatus ? streamingService : nil
+                                ))
+                            }
+                            dismiss()
+                        } catch {
+                            print("Error saving film: \(error)")
+                        }
+                        isLoading = false
+                    }
+                }) {
+                    if isLoading {
+                        ProgressView()
+                    } else {
+                        Text("Save")
                     }
                 }
                 .frame(maxWidth: .infinity)
+                .disabled(isLoading)
             }
         }
         .navigationTitle("Add Film")
+        .task {
+            // Initial fetch of genres
+            if let details = try? await imdbService.fetchMovieDetails(imdbId: imdbResult.imdbID) {
+                genres = details.Genre.components(separatedBy: ", ")
+            }
+        }
     }
 } 
