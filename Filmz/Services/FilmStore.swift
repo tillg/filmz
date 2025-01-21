@@ -9,7 +9,7 @@ class FilmStore: ObservableObject {
     @Published private(set) var iCloudStatus: String = ""
     private let container: CKContainer
     private let database: CKDatabase
-    private let logger = Logger()
+    private let logger = Logger(subsystem: Bundle.main.bundleIdentifier!, category: "FilmStore")
     
     init() {
         container = CKContainer(identifier: "iCloud.com.grtnr.Filmz")

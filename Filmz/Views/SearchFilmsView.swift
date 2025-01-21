@@ -3,7 +3,8 @@ import OSLog
 
 struct SearchFilmsView: View {
     let filmStore: FilmStore
-    private let logger = Logger()
+    private let logger = Logger(subsystem: Bundle.main.bundleIdentifier!, category: "SearchFilmsView")
+
 
     @Environment(\.dismiss) private var dismiss
     @StateObject private var viewModel = FilmzViewModel()
