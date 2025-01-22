@@ -54,12 +54,13 @@ actor IMDBService {
     
     func searchMovies(_ query: String, page: Int = 1) async throws -> SearchState {
         let cleanedQuery = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        let searchQuery = cleanedQuery + "*"
         
         guard cleanedQuery.count >= 2 else {
             return SearchState(query: cleanedQuery, totalResults: 0, currentPage: page, results: [])
         }
         
-        guard let encodedQuery = cleanedQuery.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) else {
+        guard let encodedQuery = searchQuery.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) else {
             return SearchState(query: cleanedQuery, totalResults: 0, currentPage: page, results: [])
         }
         
