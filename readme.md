@@ -27,8 +27,10 @@ Functionality:
 
 ## Setup / Run / Build 
 
-In order to build a package to publish go on `Product > Archive` and then `Distribute App`.
+In order to **build and publish** a package go on `Product > Archive` and then `Distribute App`.
 To *distribute* it the App I currently use TestFlight. Use [App Store Connect](https://appstoreconnect.apple.com) to upload the app and see what has been uploaded in the past.
+
+To **set the icons**, make to have one png in 1024x1024 and then run `./Scripts/generate_app_icons.sh ./Logo/original_icon.png`.
 
 ## Roadmap
 
