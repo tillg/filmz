@@ -41,7 +41,6 @@ To make nice **screenshots**, this is my process:
 
 Features in no specific order:
 
-* Add a field when I added a film.
 * Add rating from IMDB and from the user.
 * Sort options: By alphabet, by date added, by rating.
 * Share a movie with a friend.
