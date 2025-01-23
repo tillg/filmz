@@ -41,11 +41,9 @@ To make nice **screenshots**, this is my process:
 
 Features in no specific order:
 
-* Disallow adding the same movie twice.
 * Add a field when I added a film.
-* Sort options: By alphabet, by date added, by rating.
 * Add rating from IMDB and from the user.
-* 
+* Sort options: By alphabet, by date added, by rating.
 * Share a movie with a friend.
 
 Technical playgrounds & toys on my list:

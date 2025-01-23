@@ -49,6 +49,12 @@ struct FilmRow: View {
                         .font(.caption)
                         .foregroundStyle(.secondary)
                     }
+                    
+                    if abs(film.dateAdded.timeIntervalSinceNow) > 5 {
+                        Text("Added \(film.dateAdded.formatted(date: .abbreviated, time: .omitted))")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
                 }
                 
                 Spacer()

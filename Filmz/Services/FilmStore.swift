@@ -110,6 +110,7 @@ class FilmStore: ObservableObject {
         record["watched"] = film.watched
         record["watchDate"] = film.watchDate
         record["streamingService"] = film.streamingService
+        record["dateAdded"] = film.dateAdded
         
         do {
             let savedRecord = try await database.save(record)
@@ -273,7 +274,8 @@ extension Film {
             intendedAudience: AudienceType(rawValue: record["intendedAudience"] as? String ?? "") ?? .alone,
             watched: record["watched"] as? Bool ?? false,
             watchDate: record["watchDate"] as? Date,
-            streamingService: record["streamingService"] as? String
+            streamingService: record["streamingService"] as? String,
+            dateAdded: record["dateAdded"] as? Date ?? Date()
         )
     }
 } 

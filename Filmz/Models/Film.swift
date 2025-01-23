@@ -15,6 +15,7 @@ struct Film: Identifiable, Codable {
     var releaseDate: Date
     var runtime: Int  // in minutes
     var plot: String
+    var dateAdded: Date  // Add this field
     
     // Sharing information
     var recommendedBy: String?
@@ -48,7 +49,8 @@ struct Film: Identifiable, Codable {
         intendedAudience: AudienceType,
         watched: Bool = false,
         watchDate: Date? = nil,
-        streamingService: String? = nil
+        streamingService: String? = nil,
+        dateAdded: Date = Date()  // Default to current date
     ) {
         self.id = id
         self.title = title
@@ -67,5 +69,6 @@ struct Film: Identifiable, Codable {
         self.watched = watched
         self.watchDate = watchDate
         self.streamingService = streamingService
+        self.dateAdded = dateAdded
     }
 } 
