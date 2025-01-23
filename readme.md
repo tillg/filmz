@@ -32,13 +32,20 @@ To *distribute* it the App I currently use TestFlight. Use [App Store Connect](h
 
 To **set the icons**, make to have one png in 1024x1024 and then run `./Scripts/generate_app_icons.sh ./Logo/original_icon.png`.
 
+To make nice **screenshots**, this is my process:
+* Run the app from Xcode in the simulator (iPhone or iPad)
+* Use the Screenshot button at the bottom right of the simulator
+* Then make the screenshots in 3D with [Previewed](https://previewed.app/)
+
 ## Roadmap
 
 Features in no specific order:
 
-* Fix the search capabilities. Thx to Sergio: Add a "*" at the end.
 * Disallow adding the same movie twice.
+* Add a field when I added a film.
+* Sort options: By alphabet, by date added, by rating.
 * Add rating from IMDB and from the user.
+* 
 * Share a movie with a friend.
 
 Technical playgrounds & toys on my list:

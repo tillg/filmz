@@ -16,6 +16,7 @@ struct AddFilmView: View {
     @State private var film: Film?
     @State private var showingError = false
     @State private var error: Error?
+    @State private var showingDuplicateAlert = false
     
     var body: some View {
         Form {
@@ -75,6 +76,16 @@ struct AddFilmView: View {
                 Button(action: {
                     isLoading = true
                     Task {
+                        // Check if film exists
+                        if filmStore.films.contains(where: { 
+                            $0.title.lowercased() == imdbResult.Title.lowercased() && 
+                            $0.year == imdbResult.Year 
+                        }) {
+                            isLoading = false
+                            showingDuplicateAlert = true
+                            return
+                        }
+                        
                         // Create film with basic info first
                         let film = Film(
                             title: imdbResult.Title,
@@ -194,6 +205,11 @@ struct AddFilmView: View {
             Button("OK") {}
         } message: {
             Text(error?.localizedDescription ?? "Unknown error")
+        }
+        .alert("Movie Already in Library", isPresented: $showingDuplicateAlert) {
+            Button("OK") {}
+        } message: {
+            Text("\(imdbResult.Title) (\(imdbResult.Year)) is already in your library.")
         }
     }
 } 

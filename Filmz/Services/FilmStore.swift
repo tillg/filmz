@@ -83,6 +83,16 @@ class FilmStore: ObservableObject {
     
     func addFilm(_ film: Film) async {
         logger.info("Starting to add film: \(film.title)")
+        
+        // Check if film already exists
+        if films.contains(where: { 
+            $0.title.lowercased() == film.title.lowercased() && 
+            $0.year == film.year 
+        }) {
+            logger.info("Film already exists in library: \(film.title) (\(film.year))")
+            return
+        }
+        
         let record = CKRecord(recordType: "Film")
         
         // Set all fields
