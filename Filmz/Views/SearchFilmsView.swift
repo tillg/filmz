@@ -13,7 +13,10 @@ struct SearchFilmsView: View {
     var body: some View {
         NavigationView {
             List {
-                if viewModel.isSearching && viewModel.searchResults.isEmpty {
+                if let error = viewModel.serviceInitError {
+                    Text("Failed to initialize IMDB service: \(error.localizedDescription)")
+                        .foregroundColor(.red)
+                } else if viewModel.isSearching && viewModel.searchResults.isEmpty {
                     ProgressView()
                         .frame(maxWidth: .infinity)
                 } else if let error = viewModel.searchError {

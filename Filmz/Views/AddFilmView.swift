@@ -4,8 +4,6 @@ struct AddFilmView: View {
     let imdbResult: IMDBService.SearchResult
     let filmStore: FilmStore
     let dismiss: DismissAction
-    private let imdbService = IMDBService()
-    
     @State private var isLoading = false
     @State private var genres: [String] = []
     @State private var watchStatus = false
@@ -17,7 +15,8 @@ struct AddFilmView: View {
     @State private var showingError = false
     @State private var error: Error?
     @State private var showingDuplicateAlert = false
-    
+    @State private var detailsError: Error?
+
     var body: some View {
         Form {
             Section("Movie Details") {
@@ -110,7 +109,7 @@ struct AddFilmView: View {
                         await filmStore.addFilm(film)
                         
                         // Then try to fetch and update additional details
-                        if let details = try? await imdbService.fetchMovieDetails(imdbId: imdbResult.imdbID) {
+                        if let details = try? await loadMovieDetails() {
                             // Update with full details
                             let updatedFilm = Film(
                                 title: details.Title,
@@ -158,48 +157,9 @@ struct AddFilmView: View {
         .navigationTitle("Add Film")
         .task {
             // Initial fetch of genres
-            if let details = try? await imdbService.fetchMovieDetails(imdbId: imdbResult.imdbID) {
+            if let details = try? await loadMovieDetails() {
                 genres = details.Genre.components(separatedBy: ", ")
             }
-        }
-        .task {
-            // Remove the do-catch since Film initialization doesn't throw
-            let details = try? await IMDBService().fetchMovieDetails(imdbId: imdbResult.imdbID)
-            
-            if let details = details {
-                // Convert IMDb rating to Double
-                let rating = Double(details.imdbRating) ?? 0.0
-                
-                // Parse genres
-                let genres = details.Genre.components(separatedBy: ", ")
-                
-                // Parse runtime to minutes
-                let runtime = details.Runtime.components(separatedBy: " ").first.flatMap(Int.init) ?? 0
-                
-                film = Film(
-                    title: details.Title,
-                    year: details.Year,
-                    genres: genres,
-                    imdbRating: rating,
-                    posterUrl: details.Poster,
-                    description: details.Plot,
-                    country: details.Country,
-                    language: details.Language,
-                    releaseDate: Date(),
-                    runtime: runtime,
-                    plot: details.Plot,
-                    recommendedBy: recommendedBy,
-                    intendedAudience: audience,
-                    watched: watchStatus,
-                    watchDate: watchStatus ? watchDate : nil,
-                    streamingService: watchStatus ? streamingService : nil
-                )
-            } else {
-                error = NSError(domain: "AddFilmView", code: 1, userInfo: [NSLocalizedDescriptionKey: "Failed to load film details"])
-                showingError = true
-            }
-            
-            isLoading = false
         }
         .alert("Error", isPresented: $showingError) {
             Button("OK") {}
@@ -211,5 +171,20 @@ struct AddFilmView: View {
         } message: {
             Text("\(imdbResult.Title) (\(imdbResult.Year)) is already in your library.")
         }
+        .alert("Error Loading Movie Details", isPresented: .init(get: { detailsError != nil }, set: { _ in detailsError = nil })) {
+            Button("OK") {}
+        } message: {
+            Text(detailsError?.localizedDescription ?? "Unknown error")
+        }
     }
-} 
+    
+    private func loadMovieDetails() async -> IMDBService.DetailResponse? {
+        do {
+            let imdbService = try IMDBService()
+            return try await imdbService.fetchMovieDetails(imdbId: imdbResult.imdbID)
+        } catch {
+            detailsError = error
+            return nil
+        }
+    }
+}

@@ -3,17 +3,35 @@ import SwiftUI
 
 @MainActor
 class FilmzViewModel: ObservableObject {
-    private let imdbService = IMDBService()
+    private var imdbService: IMDBService?
     @Published var searchResults: [IMDBService.SearchResult] = []
     @Published var isSearching = false
     @Published var searchError: Error?
     @Published var canLoadMore = false
+    @Published var serviceInitError: Error?
     
     private var currentQuery = ""
     private var currentPage = 1
     private var totalResults = 0
     
+    init() {
+        initializeService()
+    }
+    
+    private func initializeService() {
+        do {
+            imdbService = try IMDBService()
+        } catch {
+            serviceInitError = error
+        }
+    }
+    
     func search(_ query: String) {
+        guard let imdbService else {
+            searchError = serviceInitError ?? NSError(domain: "FilmzViewModel", code: -1, userInfo: [NSLocalizedDescriptionKey: "IMDB Service not initialized"])
+            return
+        }
+        
         guard !query.isEmpty else {
             searchResults = []
             canLoadMore = false
@@ -46,7 +64,7 @@ class FilmzViewModel: ObservableObject {
     }
     
     func loadMore() async {
-        guard !isSearching && canLoadMore else { return }
+        guard let imdbService, !isSearching && canLoadMore else { return }
         
         isSearching = true
         

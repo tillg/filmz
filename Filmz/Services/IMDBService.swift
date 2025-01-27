@@ -4,8 +4,12 @@ actor IMDBService {
     private let apiKey: String
     private let baseUrl = "https://www.omdbapi.com/"
     
-    init(apiKey: String = "1b5a29bf") {
-        self.apiKey = apiKey
+    init(apiKey: String? = nil) throws {
+        if let providedKey = apiKey {
+            self.apiKey = providedKey
+        } else {
+            self.apiKey = try Configuration.shared.string(forKey: "OMDB_API_KEY")
+        }
     }
     
     struct SearchResponse: Codable {
