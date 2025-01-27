@@ -37,18 +37,20 @@ To make nice **screenshots**, this is my process:
 * Use the Screenshot button at the bottom right of the simulator
 * Then make the screenshots in 3D with [Previewed](https://previewed.app/)
 
+To create a **Privacy Policy** or to update it, I used [freeprivacypolicy.com](https://www.freeprivacypolicy.com/live/71c56b38-c4cf-4f25-b4c0-fc0920dfb53a).
+
 ## Roadmap
 
 Features in no specific order:
 
-* Add rating from IMDB and from the user.
-* Sort options: By alphabet, by date added, by rating.
+* Build the corresponding website using Jekyll and the [Minimal Mistakes Theme](https://github.com/mmistakes/minimal-mistakes). 
+* Allow sorting by rating.
 * Share a movie with a friend.
 
 Technical playgrounds & toys on my list:
 
 * Use Windsurf in order to compare it to cursor ai
-* use Google AI Studio to work on the logo
+* use Google AI Studio to work on the website
 
 ## Movie Databases
 

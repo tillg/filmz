@@ -7,6 +7,11 @@ import OSLog
 class FilmStore: ObservableObject {
     @Published private(set) var films: [Film] = []
     @Published private(set) var iCloudStatus: String = ""
+    @Published var sortOption: SortOption = .dateAdded {
+        didSet {
+            sortFilms()
+        }
+    }
     private let container: CKContainer
     private let database: CKDatabase
     private let logger = Logger(subsystem: Bundle.main.bundleIdentifier!, category: "FilmStore")
@@ -68,6 +73,7 @@ class FilmStore: ObservableObject {
             }
             
             films = loadedFilms
+            sortFilms()  // Sort after loading
             print("Successfully loaded \(loadedFilms.count) films")
         } catch {
             print("Failed to fetch films with error: \(error)")
@@ -79,6 +85,10 @@ class FilmStore: ObservableObject {
                 }
             }
         }
+    }
+    
+    private func sortFilms() {
+        films = SortOption.sort(films, by: sortOption)
     }
     
     func addFilm(_ film: Film) async {
@@ -117,7 +127,9 @@ class FilmStore: ObservableObject {
             logger.info("Successfully saved record with ID: \(savedRecord.recordID)")
             
             await MainActor.run {
-                self.films.append(film)
+                var newFilms = films
+                newFilms.append(film)
+                films = SortOption.sort(newFilms, by: sortOption)
             }
             
             // Check iCloud status after saving
@@ -141,7 +153,10 @@ class FilmStore: ObservableObject {
             let records = try await database.records(matching: query)
             if let record = try records.matchResults.first?.1.get() {
                 try await database.deleteRecord(withID: record.recordID)
-                films.removeAll { $0.id == film.id }
+                await MainActor.run {
+                    // Create a new array instead of modifying in place
+                    films = films.filter { $0.id != film.id }
+                }
             }
         } catch {
             print("Failed to delete film: \(error)")
