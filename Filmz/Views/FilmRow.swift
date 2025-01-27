@@ -24,6 +24,12 @@ struct FilmRow: View {
                     HStack(spacing: 4) {
                         Text(film.year)
                         Text("•")
+                        if film.imdbRating > 0 {
+                            Image(systemName: "star.fill")
+                                .foregroundStyle(.yellow)
+                                .imageScale(.small)
+                            Text(String(format: "%.1f", film.imdbRating))
+                        }
                     }
                     .font(.subheadline)
                     .foregroundStyle(.secondary)

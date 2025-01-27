@@ -16,6 +16,7 @@ struct AddFilmView: View {
     @State private var error: Error?
     @State private var showingDuplicateAlert = false
     @State private var detailsError: Error?
+    @State private var movieDetails: IMDBService.DetailResponse?
 
     var body: some View {
         Form {
@@ -33,6 +34,24 @@ struct AddFilmView: View {
                 Text(imdbResult.Title)
                     .font(.headline)
                 Text("Year: \(imdbResult.Year)")
+                
+                if let details = movieDetails {
+                    if details.imdbRating != "N/A", let rating = Double(details.imdbRating), rating > 0 {
+                        HStack {
+                            Image(systemName: "star.fill")
+                                .foregroundStyle(.yellow)
+                            Text("IMDB Rating: \(details.imdbRating)/10")
+                        }
+                        .padding(.top, 4)
+                    }
+                    
+                    if details.Plot != "N/A" {
+                        Text(details.Plot)
+                            .font(.body)
+                            .foregroundStyle(.secondary)
+                            .padding(.top, 4)
+                    }
+                }
             }
             
             if !genres.isEmpty {
@@ -90,14 +109,14 @@ struct AddFilmView: View {
                             title: imdbResult.Title,
                             year: imdbResult.Year,
                             genres: genres,
-                            imdbRating: 0.0,
+                            imdbRating: movieDetails?.imdbRatingDouble ?? 0.0,
                             posterUrl: imdbResult.Poster,
-                            description: "",
-                            country: "",
-                            language: "",
+                            description: movieDetails?.Plot ?? "",
+                            country: movieDetails?.Country ?? "",
+                            language: movieDetails?.Language ?? "",
                             releaseDate: Date(),
-                            runtime: 0,
-                            plot: "",
+                            runtime: movieDetails?.runtimeMinutes ?? 0,
+                            plot: movieDetails?.Plot ?? "",
                             recommendedBy: recommendedBy,
                             intendedAudience: audience,
                             watched: watchStatus,
@@ -109,7 +128,7 @@ struct AddFilmView: View {
                         await filmStore.addFilm(film)
                         
                         // Then try to fetch and update additional details
-                        if let details = try? await loadMovieDetails() {
+                        if let details = await loadMovieDetails() {
                             // Update with full details
                             let updatedFilm = Film(
                                 title: details.Title,
@@ -156,8 +175,9 @@ struct AddFilmView: View {
         }
         .navigationTitle("Add Film")
         .task {
-            // Initial fetch of genres
-            if let details = try? await loadMovieDetails() {
+            // Initial fetch of genres and details
+            if let details = await loadMovieDetails() {
+                movieDetails = details
                 genres = details.Genre.components(separatedBy: ", ")
             }
         }
@@ -181,7 +201,9 @@ struct AddFilmView: View {
     private func loadMovieDetails() async -> IMDBService.DetailResponse? {
         do {
             let imdbService = try IMDBService()
-            return try await imdbService.fetchMovieDetails(imdbId: imdbResult.imdbID)
+            let details = try await imdbService.fetchMovieDetails(imdbId: imdbResult.imdbID)
+            movieDetails = details
+            return details
         } catch {
             detailsError = error
             return nil

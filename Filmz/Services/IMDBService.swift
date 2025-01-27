@@ -1,5 +1,6 @@
 import Foundation
 
+/// Service for interacting with the OMDB API
 actor IMDBService {
     private let apiKey: String
     private let baseUrl = "https://www.omdbapi.com/"
@@ -8,7 +9,11 @@ actor IMDBService {
         if let providedKey = apiKey {
             self.apiKey = providedKey
         } else {
-            self.apiKey = try Configuration.shared.string(forKey: "OMDB_API_KEY")
+            do {
+                self.apiKey = try Configuration.shared.string(forKey: "OMDB_API_KEY")
+            } catch {
+                throw FilmzError.configurationMissing("OMDB_API_KEY")
+            }
         }
     }
     
@@ -49,6 +54,14 @@ actor IMDBService {
         let Ratings: [Rating]
         let imdbRating: String
         let imdbID: String
+        
+        var runtimeMinutes: Int {
+            Int(Runtime.components(separatedBy: " ").first ?? "0") ?? 0
+        }
+        
+        var imdbRatingDouble: Double {
+            Double(imdbRating) ?? 0.0
+        }
     }
     
     struct Rating: Codable {
@@ -61,41 +74,54 @@ actor IMDBService {
         let searchQuery = cleanedQuery + "*"
         
         guard cleanedQuery.count >= 2 else {
-            return SearchState(query: cleanedQuery, totalResults: 0, currentPage: page, results: [])
+            throw FilmzError.filmNotFound("Search query must be at least 2 characters")
         }
         
         guard let encodedQuery = searchQuery.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) else {
-            return SearchState(query: cleanedQuery, totalResults: 0, currentPage: page, results: [])
+            throw FilmzError.filmNotFound("Invalid search query")
         }
         
-        let url = URL(string: "\(baseUrl)?apikey=\(apiKey)&s=\(encodedQuery)&page=\(page)")!
-        print("Search URL: \(url.absoluteString)")
+        guard let url = URL(string: "\(baseUrl)?apikey=\(apiKey)&s=\(encodedQuery)&page=\(page)") else {
+            throw FilmzError.networkError(URLError(.badURL))
+        }
         
-        let (data, _) = try await URLSession.shared.data(from: url)
-        let response = try JSONDecoder().decode(SearchResponse.self, from: data)
-        
-        if response.Response == "False" {
-            throw NSError(
-                domain: "IMDBService",
-                code: 1,
-                userInfo: [NSLocalizedDescriptionKey: response.Error ?? "Movie not found!"]
+        do {
+            let (data, _) = try await URLSession.shared.data(from: url)
+            let response = try JSONDecoder().decode(SearchResponse.self, from: data)
+            
+            if response.Response == "False" {
+                throw FilmzError.filmNotFound(response.Error ?? "Movie not found!")
+            }
+            
+            return SearchState(
+                query: cleanedQuery,
+                totalResults: Int(response.totalResults ?? "0") ?? 0,
+                currentPage: page,
+                results: response.Search ?? []
             )
+        } catch let error as FilmzError {
+            throw error
+        } catch {
+            throw FilmzError.networkError(error)
         }
-        print("Number of entries found: \(response.totalResults ?? "0")")
-        return SearchState(
-            query: cleanedQuery,
-            totalResults: Int(response.totalResults ?? "0") ?? 0,
-            currentPage: page,
-            results: response.Search ?? []
-        )
     }
     
     func fetchMovieDetails(imdbId: String) async throws -> DetailResponse {
-        guard let url = URL(string: "\(baseUrl)?apikey=\(apiKey)&i=\(imdbId)&plot=full") else {
-            throw URLError(.badURL)
+        guard !imdbId.isEmpty else {
+            throw FilmzError.filmNotFound("IMDB ID cannot be empty")
         }
         
-        let (data, _) = try await URLSession.shared.data(from: url)
-        return try JSONDecoder().decode(DetailResponse.self, from: data)
+        guard let url = URL(string: "\(baseUrl)?apikey=\(apiKey)&i=\(imdbId)&plot=full") else {
+            throw FilmzError.networkError(URLError(.badURL))
+        }
+        
+        do {
+            let (data, _) = try await URLSession.shared.data(from: url)
+            return try JSONDecoder().decode(DetailResponse.self, from: data)
+        } catch let error as DecodingError {
+            throw FilmzError.decodingError(error)
+        } catch {
+            throw FilmzError.networkError(error)
+        }
     }
-} 
+}

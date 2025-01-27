@@ -58,6 +58,23 @@ struct FilmFormView: View {
                 Text(existingFilm?.title ?? imdbResult?.Title ?? "")
                     .font(.headline)
                 Text("Year: \(existingFilm?.year ?? imdbResult?.Year ?? "")")
+                
+                if let film = existingFilm {
+                    if film.imdbRating > 0 {
+                        HStack {
+                            Image(systemName: "star.fill")
+                                .foregroundStyle(.yellow)
+                            Text("IMDB Rating: \(String(format: "%.1f", film.imdbRating))/10")
+                        }
+                    }
+                    
+                    if !film.plot.isEmpty {
+                        Text(film.plot)
+                            .font(.body)
+                            .foregroundStyle(.secondary)
+                            .padding(.top, 4)
+                    }
+                }
             }
             
             Section("Genres") {
