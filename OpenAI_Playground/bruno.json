@@ -1,0 +1,9 @@
+{
+  "version": "1",
+  "name": "OpenAI_Playground",
+  "type": "collection",
+  "ignore": [
+    "node_modules",
+    ".git"
+  ]
+}

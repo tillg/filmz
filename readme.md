@@ -44,7 +44,7 @@ To create a **Privacy Policy** or to update it, I used [freeprivacypolicy.com](h
 Features in no specific order:
 
 * Build the corresponding website using Jekyll and the [Minimal Mistakes Theme](https://github.com/mmistakes/minimal-mistakes). 
-* Allow sorting by rating.
+* Cache the movie pictures in order to speed up the app.
 * Share a movie with a friend.
 
 Technical playgrounds & toys on my list:
