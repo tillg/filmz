@@ -52,10 +52,24 @@ class FilmStore: ObservableObject {
             return
         }
         
-        // Otherwise, delegate to repository
+        // Create a mutable copy of the film
+        var filmToAdd = film
+        
+        // Download and create CloudKit asset for the poster if not already present
+        if filmToAdd.posterAsset == nil {
+            do {
+                if let posterAsset = try await PosterImageCache.shared.downloadAndCreateAsset(from: film.posterUrl) {
+                    filmToAdd.posterAsset = posterAsset
+                }
+            } catch {
+                logger.error("Failed to create poster asset: \\(error.localizedDescription)")
+            }
+        }
+        
+        // Delegate to repository
         do {
-            try await repository.addFilm(film)
-            films.append(film)
+            try await repository.addFilm(filmToAdd)
+            films.append(filmToAdd)
             sortFilms()
         } catch {
             logger.error("Error adding film \\(film.title): \\(error.localizedDescription)")
@@ -73,7 +87,15 @@ class FilmStore: ObservableObject {
     
     func updateFilm(_ film: Film, with data: EditedFilmData) async {
         do {
-            try await repository.updateFilm(film, with: data)
+            // If we're updating the film and it doesn't have a poster asset yet, create one
+            var updatedFilm = film
+            if film.posterAsset == nil {
+                if let posterAsset = try await PosterImageCache.shared.downloadAndCreateAsset(from: film.posterUrl) {
+                    updatedFilm.posterAsset = posterAsset
+                }
+            }
+            
+            try await repository.updateFilm(updatedFilm, with: data)
             
             // Reflect changes in the local array
             if let index = films.firstIndex(where: { $0.id == film.id }) {
@@ -84,6 +106,7 @@ class FilmStore: ObservableObject {
                     genres: data.genres,
                     imdbRating: film.imdbRating,
                     posterUrl: film.posterUrl,
+                    posterAsset: updatedFilm.posterAsset,
                     description: film.description,
                     country: film.country,
                     language: film.language,

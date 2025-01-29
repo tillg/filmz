@@ -7,16 +7,9 @@ struct FilmRow: View {
     var body: some View {
         NavigationLink(destination: FilmFormView(filmStore: filmStore, existingFilm: film)) {
             HStack {
-                AsyncImage(url: URL(string: film.posterUrl)) { image in
-                    image
-                        .resizable()
-                        .aspectRatio(contentMode: .fill)
-                } placeholder: {
-                    Image(systemName: "film")
-                        .foregroundStyle(.gray)
-                }
-                .frame(width: 50, height: 75)
-                .cornerRadius(8)
+                PosterImage(film: film)
+                    .frame(width: 50, height: 75)
+                    .cornerRadius(8)
                 
                 VStack(alignment: .leading, spacing: 4) {
                     Text(film.title)

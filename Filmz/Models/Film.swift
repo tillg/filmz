@@ -1,4 +1,16 @@
 import Foundation
+import CloudKit
+
+/// Custom CKAsset coding to handle Codable conformance
+private extension CKAsset {
+    func encode() -> String? {
+        return fileURL?.path
+    }
+    
+    static func decode(from path: String) -> CKAsset? {
+        return CKAsset(fileURL: URL(fileURLWithPath: path))
+    }
+}
 
 /// Represents a film in the application with its metadata and user preferences
 struct Film: Identifiable, Codable {
@@ -38,6 +50,9 @@ struct Film: Identifiable, Codable {
     
     /// URL of the film's poster image
     var posterUrl: String
+    
+    /// CloudKit asset for the poster image
+    var posterAsset: CKAsset?
     
     /// Brief description of the film
     var description: String
@@ -96,7 +111,7 @@ struct Film: Identifiable, Codable {
     }
     
     enum CodingKeys: String, CodingKey {
-        case id, title, year, genres, posterUrl, description, trailerUrl
+        case id, title, year, genres, posterUrl, posterAsset, description, trailerUrl
         case country, language, releaseDate, plot, dateAdded
         case recommendedBy, intendedAudience, watched, watchDate, streamingService
         case myRating = "_myRating"
@@ -114,6 +129,14 @@ struct Film: Identifiable, Codable {
         _myRating = try container.decodeIfPresent(Int.self, forKey: .myRating)
         _imdbRating = try container.decode(Double.self, forKey: .imdbRating)
         posterUrl = try container.decode(String.self, forKey: .posterUrl)
+        
+        // Decode CKAsset from String path
+        if let path = try container.decodeIfPresent(String.self, forKey: .posterAsset) {
+            posterAsset = CKAsset.decode(from: path)
+        } else {
+            posterAsset = nil
+        }
+        
         description = try container.decode(String.self, forKey: .description)
         trailerUrl = try container.decodeIfPresent(String.self, forKey: .trailerUrl)
         country = try container.decode(String.self, forKey: .country)
@@ -139,6 +162,12 @@ struct Film: Identifiable, Codable {
         try container.encodeIfPresent(_myRating, forKey: .myRating)
         try container.encode(_imdbRating, forKey: .imdbRating)
         try container.encode(posterUrl, forKey: .posterUrl)
+        
+        // Encode CKAsset as String path
+        if let path = posterAsset?.encode() {
+            try container.encode(path, forKey: .posterAsset)
+        }
+        
         try container.encode(description, forKey: .description)
         try container.encodeIfPresent(trailerUrl, forKey: .trailerUrl)
         try container.encode(country, forKey: .country)
@@ -161,13 +190,15 @@ struct Film: Identifiable, Codable {
         genres: [String],
         imdbRating: Double,
         posterUrl: String,
+        posterAsset: CKAsset? = nil,
         description: String,
+        trailerUrl: String? = nil,
         country: String,
         language: String,
         releaseDate: Date,
         runtime: Int,
         plot: String,
-        recommendedBy: String?,
+        recommendedBy: String? = nil,
         intendedAudience: AudienceType,
         watched: Bool = false,
         watchDate: Date? = nil,
@@ -180,7 +211,9 @@ struct Film: Identifiable, Codable {
         self.genres = genres
         self._imdbRating = imdbRating
         self.posterUrl = posterUrl
+        self.posterAsset = posterAsset
         self.description = description
+        self.trailerUrl = trailerUrl
         self.country = country
         self.language = language
         self.releaseDate = releaseDate
