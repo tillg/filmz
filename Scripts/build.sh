@@ -1,0 +1,1 @@
+xcodebuild -workspace Filmz.xcodeproj/project.xcworkspace -scheme Filmz build
