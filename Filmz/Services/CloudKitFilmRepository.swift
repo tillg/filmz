@@ -2,16 +2,32 @@ import CloudKit
 import OSLog
 import Foundation
 
+/// CloudKitFilmRepository is responsible for persisting film data to iCloud
+/// using CloudKit. It implements the FilmRepository protocol and handles all
+/// CloudKit-specific operations including:
+/// - Storing films in the user's private database
+/// - Managing CloudKit records and assets
+/// - Handling CloudKit-specific errors
+/// - Converting between Film models and CKRecord objects
 actor CloudKitFilmRepository: FilmRepository {
+    /// The CloudKit database used for storage (private database)
     private let database: CKDatabase
+    
+    /// Logger instance for debugging and error tracking
     private let logger = Logger(subsystem: Bundle.main.bundleIdentifier!, category: "CloudKitFilmRepository")
     
+    /// Initializes the repository with a CloudKit container identifier
+    /// - Parameter containerIdentifier: The CloudKit container identifier. Defaults to "iCloud.com.grtnr.Filmz"
     init(containerIdentifier: String = "iCloud.com.grtnr.Filmz") {
         let container = CKContainer(identifier: containerIdentifier)
         self.database = container.privateCloudDatabase
         logger.info("CloudKitFilmRepository initialized")
     }
     
+    /// Fetches all films from CloudKit
+    /// - Returns: An array of Film objects
+    /// - Throws: CloudKit errors if the fetch fails
+    /// - Note: Results are sorted by title in ascending order
     func fetchAllFilms() async throws -> [Film] {
         logger.info("Fetching all films from CloudKit")
         
@@ -37,6 +53,10 @@ actor CloudKitFilmRepository: FilmRepository {
         }
     }
     
+    /// Adds a new film to CloudKit
+    /// - Parameter film: The film to add
+    /// - Throws: CloudKit errors if the save fails
+    /// - Note: This creates a new CKRecord with the film's data and any associated assets
     func addFilm(_ film: Film) async throws {
         logger.info("Adding film to CloudKit: \\(film.title)")
         
@@ -52,6 +72,15 @@ actor CloudKitFilmRepository: FilmRepository {
         }
     }
     
+    /// Updates an existing film in CloudKit
+    /// - Parameters:
+    ///   - film: The film to update
+    ///   - data: The new data to apply
+    /// - Throws: CloudKit errors if the update fails
+    /// - Note: This method:
+    ///   1. Finds the existing record by title and year
+    ///   2. Updates only the fields that can be edited
+    ///   3. Preserves other fields
     func updateFilm(_ film: Film, with data: EditedFilmData) async throws {
         logger.info("Updating film in CloudKit: \\(film.title)")
         
@@ -90,6 +119,10 @@ actor CloudKitFilmRepository: FilmRepository {
         }
     }
     
+    /// Deletes a film from CloudKit
+    /// - Parameter film: The film to delete
+    /// - Throws: CloudKit errors if the deletion fails
+    /// - Note: This method finds the record by title and year before deleting
     func deleteFilm(_ film: Film) async throws {
         logger.info("Deleting film from CloudKit: \\(film.title)")
         
@@ -114,6 +147,9 @@ actor CloudKitFilmRepository: FilmRepository {
     
     // MARK: - CKRecord Mapping Helpers
     
+    /// Converts a CKRecord to a Film model
+    /// - Parameter record: The CloudKit record to convert
+    /// - Returns: A Film object if conversion succeeds, nil otherwise
     private func from(record: CKRecord) -> Film? {
         guard
             let title = record["title"] as? String,
@@ -146,6 +182,10 @@ actor CloudKitFilmRepository: FilmRepository {
         )
     }
     
+    /// Updates a CKRecord with data from a Film model
+    /// - Parameters:
+    ///   - record: The CloudKit record to update
+    ///   - film: The film data to use
     private func toRecord(_ record: CKRecord, from film: Film) {
         record["title"] = film.title
         record["year"] = film.year
