@@ -21,7 +21,7 @@ struct CacheTestView: View {
     var body: some View {
         NavigationView {
             VStack(spacing: 20) {
-                PosterImage(film: testFilm)
+                PosterImage(imageUrl: testFilm.posterUrl)
                     .frame(height: 200)
                 
                 Button("Clear Cache") {
@@ -35,10 +35,6 @@ struct CacheTestView: View {
                 }
                 .buttonStyle(.bordered)
                 
-                Button("Show Cache Info") {
-                    ImageCache.shared.debugCacheInfo()
-                }
-                .buttonStyle(.bordered)
                 
                 Text("Load count: \(loadCount)")
                     .foregroundStyle(.secondary)

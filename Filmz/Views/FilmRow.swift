@@ -7,7 +7,7 @@ struct FilmRow: View {
     var body: some View {
         NavigationLink(destination: FilmFormView(filmStore: filmStore, existingFilm: film)) {
             HStack {
-                PosterImage(film: film)
+                PosterImage(imageUrl: film.posterUrl)
                     .frame(width: 50, height: 75)
                     .cornerRadius(8)
                 

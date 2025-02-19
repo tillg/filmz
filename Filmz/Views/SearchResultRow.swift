@@ -11,9 +11,9 @@ struct SearchResultRow: View {
     
     var body: some View {
         HStack(spacing: 12) {
-            PosterImage(film: dummyFilm)
-                .frame(width: 50, height: 75)
-                .cornerRadius(8)
+            PosterImage(imageUrl: dummyFilm.posterUrl)
+            .frame(width: 50, height: 75)
+            .cornerRadius(8)
             
             VStack(alignment: .leading, spacing: 4) {
                 Text(result.Title)
@@ -26,4 +26,4 @@ struct SearchResultRow: View {
         }
         .padding(.vertical, 4)
     }
-} 
+}

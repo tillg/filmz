@@ -29,7 +29,6 @@ actor IMDBService {
         let Title: String
         let Year: String
         let Poster: String
-        
         var id: String { imdbID }
     }
     
