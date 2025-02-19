@@ -6,25 +6,21 @@ struct ContentView: View {
     @State private var watchFilter: FilmListView.WatchFilter = .all
     
     var body: some View {
-        NavigationView {
-            FilmListView(
-                films: filmStore.films,
-                filmStore: filmStore,
-                watchFilter: $watchFilter
-            )
-            .navigationTitle("My Filmz")
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button {
-                        showingSearch = true
-                    } label: {
-                        Image(systemName: "plus")
-                    }
+        TabView {
+            SearchFilmsView(filmStore: filmStore)
+                .tabItem {
+                    Label("Search", systemImage: "magnifyingglass")
                 }
-            }
-            .sheet(isPresented: $showingSearch) {
-                SearchFilmsView(filmStore: filmStore)
-            }
+            
+            MyMoviesView()
+                .tabItem {
+                    Label("My Movies", systemImage: "film")
+                }
+            
+            CacheTestView()
+                .tabItem {
+                    Label("Cache Test", systemImage: "gear")
+                }
         }
     }
 }

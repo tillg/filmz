@@ -1,4 +1,4 @@
-// Filmz/Views/SearchResultRow.swift
+//Views/SearchResultRow.swift
 
 import SwiftUI
 
@@ -6,7 +6,7 @@ struct SearchResultRow: View {
     let result: IMDBService.SearchResult
     
     private var dummyFilm: Film {
-        Film.dummy(from: result)  // Using the factory method consistently
+        Film.dummy(from: result)
     }
     
     var body: some View {
@@ -22,6 +22,7 @@ struct SearchResultRow: View {
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
             }
+            
             Spacer()
         }
         .padding(.vertical, 4)

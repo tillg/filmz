@@ -20,7 +20,7 @@ struct PosterImage: View {
     let film: Film
     
     /// Shared image cache instance
-    @StateObject private var imageCache = PosterImageCache.shared
+    @StateObject private var imageCache = ImageCache.shared
     
     /// Currently loaded image
     @State private var image: Image?
@@ -37,7 +37,7 @@ struct PosterImage: View {
             }
         }
         .task {
-            image = await imageCache.image(for: film)
+            image = await imageCache.image(for: film.posterUrl)
         }
     }
 }

@@ -1,3 +1,5 @@
+//Filmz/Models/Film.swift
+
 import Foundation
 import CloudKit
 
@@ -32,7 +34,7 @@ struct Film: Identifiable, Codable {
         get { _myRating }
         set {
             if let rating = newValue {
-                assert((1...10).contains(rating), "Rating must be between 1 and 10")
+                assert((0...10).contains(rating), "Rating must be between 0 and 10")
             }
             _myRating = newValue
         }
@@ -51,8 +53,6 @@ struct Film: Identifiable, Codable {
     /// URL of the film's poster image
     var posterUrl: String
     
-    /// CloudKit asset for the poster image
-    var posterAsset: CKAsset?
     
     /// Brief description of the film
     var description: String
@@ -130,12 +130,6 @@ struct Film: Identifiable, Codable {
         _imdbRating = try container.decode(Double.self, forKey: .imdbRating)
         posterUrl = try container.decode(String.self, forKey: .posterUrl)
         
-        // Decode CKAsset from String path
-        if let path = try container.decodeIfPresent(String.self, forKey: .posterAsset) {
-            posterAsset = CKAsset.decode(from: path)
-        } else {
-            posterAsset = nil
-        }
         
         description = try container.decode(String.self, forKey: .description)
         trailerUrl = try container.decodeIfPresent(String.self, forKey: .trailerUrl)
@@ -163,10 +157,6 @@ struct Film: Identifiable, Codable {
         try container.encode(_imdbRating, forKey: .imdbRating)
         try container.encode(posterUrl, forKey: .posterUrl)
         
-        // Encode CKAsset as String path
-        if let path = posterAsset?.encode() {
-            try container.encode(path, forKey: .posterAsset)
-        }
         
         try container.encode(description, forKey: .description)
         try container.encodeIfPresent(trailerUrl, forKey: .trailerUrl)
@@ -211,7 +201,6 @@ struct Film: Identifiable, Codable {
         self.genres = genres
         self._imdbRating = imdbRating
         self.posterUrl = posterUrl
-        self.posterAsset = posterAsset
         self.description = description
         self.trailerUrl = trailerUrl
         self.country = country
@@ -225,5 +214,51 @@ struct Film: Identifiable, Codable {
         self.watchDate = watchDate
         self.streamingService = streamingService
         self.dateAdded = dateAdded
+    }
+    
+    static func dummy(from result: IMDBService.SearchResult) -> Film {
+        Film(
+            title: result.Title,
+            year: result.Year,
+            genres: [],
+            imdbRating: 0.0,
+            posterUrl: result.Poster,
+            description: "",
+            country: "",
+            language: "",
+            releaseDate: Date(),
+            runtime: 0,
+            plot: "",
+            intendedAudience: .alone,
+            watched: false,
+            dateAdded: Date()
+        )
+    }
+    
+    static func create(from result: IMDBService.SearchResult, 
+                      genres: [String] = [],
+                      recommendedBy: String? = nil,
+                      intendedAudience: AudienceType = .alone,
+                      watched: Bool = false,
+                      watchDate: Date? = nil,
+                      streamingService: String? = nil) -> Film {
+        Film(
+            title: result.Title,
+            year: result.Year,
+            genres: genres,
+            imdbRating: 0.0,
+            posterUrl: result.Poster,
+            description: "",
+            country: "",
+            language: "",
+            releaseDate: Date(),
+            runtime: 0,
+            plot: "",
+            recommendedBy: recommendedBy,
+            intendedAudience: intendedAudience,
+            watched: watched,
+            watchDate: watchDate,
+            streamingService: streamingService
+        )
     }
 }

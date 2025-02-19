@@ -191,7 +191,6 @@ actor CloudKitFilmRepository: FilmRepository {
         record["year"] = film.year
         record["genres"] = film.genres
         record["posterUrl"] = film.posterUrl
-        record["posterAsset"] = film.posterAsset
         record["description"] = film.description
         record["country"] = film.country
         record["language"] = film.language

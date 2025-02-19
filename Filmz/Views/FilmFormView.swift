@@ -43,17 +43,28 @@ struct FilmFormView: View {
     
     var body: some View {
         Form {
-            Section("Movie Details") {
-                let imageUrl = existingFilm?.posterUrl ?? imdbResult?.Poster
-                AsyncImage(url: URL(string: imageUrl ?? "")) { image in
-                    image
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                } placeholder: {
-                    Image(systemName: "film")
-                        .foregroundStyle(.gray)
+            Section(header: Text("Movie Details")) {
+                if let film = existingFilm {
+                    PosterImage(film: film)
+                        .frame(maxHeight: 200)
+                } else if let result = imdbResult{
+                          let dummyFilm = Film(
+                            title: result.Title,
+                            year: result.Year,
+                            genres: [],
+                            imdbRating: 0.0,
+                            posterUrl: result.Poster,
+                            description: "",
+                            country: "",
+                            language: "",
+                            releaseDate: Date(),
+                            runtime: 0,
+                            plot: "",
+                            intendedAudience: Film.AudienceType.alone
+                          ) 
+                    PosterImage(film: dummyFilm)
+                        .frame(maxHeight: 200)
                 }
-                .frame(maxHeight: 200)
                 
                 Text(existingFilm?.title ?? imdbResult?.Title ?? "")
                     .font(.headline)

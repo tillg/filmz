@@ -28,14 +28,22 @@ struct MovieDetailView: View {
             } else {
                 // Movie Poster and Basic Info
                 Section {
-                    AsyncImage(url: URL(string: result.Poster)) { image in
-                        image
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
-                    } placeholder: {
-                        ProgressView()
-                    }
-                    .frame(maxHeight: 300)
+                    let dummyFilm = Film(
+                        title: result.Title,
+                        year: result.Year,
+                        genres: [],
+                        imdbRating: 0.0,
+                        posterUrl: result.Poster,
+                        description: "",
+                        country: "",
+                        language: "",
+                        releaseDate: Date(),
+                        runtime: 0,
+                        plot: "",
+                        intendedAudience: Film.AudienceType.alone
+                    )
+                    PosterImage(film: dummyFilm)
+                        .frame(maxHeight: 300)
                     
                     Text(result.Title)
                         .font(.headline)
