@@ -53,13 +53,6 @@ struct SearchFilmsView: View {
             .onChange(of: searchText) { oldValue, newValue in
                 viewModel.search(newValue)
             }
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Cancel") {
-                        dismiss()
-                    }
-                }
-            }
         }
         .onAppear {
             logger.info("SearchFilmsView appeared")

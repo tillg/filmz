@@ -2,25 +2,25 @@ import SwiftUI
 
 struct ContentView: View {
     @StateObject private var filmStore = FilmStore()
-    @State private var showingSearch = false
-    @State private var watchFilter: FilmListView.WatchFilter = .all
-    
+
     var body: some View {
         TabView {
+            MyMoviesView(filmStore: filmStore)
+                .tabItem {
+                    Label("My Movies", systemImage: "film")
+                }
+
             SearchFilmsView(filmStore: filmStore)
                 .tabItem {
                     Label("Search", systemImage: "magnifyingglass")
                 }
-            
-            MyMoviesView()
-                .tabItem {
-                    Label("My Movies", systemImage: "film")
-                }
-            
+
+            #if DEBUG
             CacheTestView()
                 .tabItem {
                     Label("Cache Test", systemImage: "gear")
                 }
+            #endif
         }
     }
 }
