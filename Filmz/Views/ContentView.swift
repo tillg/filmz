@@ -15,12 +15,12 @@ struct ContentView: View {
                     Label("Search", systemImage: "magnifyingglass")
                 }
 
-            #if DEBUG
-            CacheTestView()
+            // #if DEBUG  2025-02-14 TODO Could not figure out how to set/unset DEBUG
+            CacheView()
                 .tabItem {
-                    Label("Cache Test", systemImage: "gear")
+                    Label("Cache", systemImage: "gear")
                 }
-            #endif
+            // #endif
         }
     }
 }

@@ -41,6 +41,8 @@ To make nice **screenshots**, this is my process:
 
 To create a **Privacy Policy** or to update it, I used [freeprivacypolicy.com](https://www.freeprivacypolicy.com/live/71c56b38-c4cf-4f25-b4c0-fc0920dfb53a).
 
+Switching on/off **debug** is needed because some features are _hidden_ behind the debug flag (notably the cache Viewer). To switch it on/off go to `Filmz > Filmz > FilmzApp.swift` and change the `debug` variable.
+
 ## Roadmap
 
 Features in no specific order:

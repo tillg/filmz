@@ -19,14 +19,27 @@ class ImageCache: ObservableObject {
     /// In-memory cache for fast access to images.
     private let cache = NSCache<NSString, UIImage>()
     
+    /// Track keys for cached images in memory
+    private var memoryKeySet = Set<String>()
+    
+    /// Public computed property to access memory cache keys
+    var memoryCacheKeys: [String] {
+        Array(memoryKeySet)
+    }
+    
     /// FileManager instance for disk operations.
     private let fileManager = FileManager.default
     
-    /// Directory where cached images are stored.
-    private let cacheDirectory: URL
+    /// Directory where cached images are stored. Changed to internal access level.
+    let cacheDirectory: URL
+    
+    /// Public computed property to access the disk cache directory.
+    var diskCacheDirectory: URL {
+        cacheDirectory
+    }
     
     /// Logger for debugging and error tracking.
-    private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "com.example.app", category: "ImageCache")
+    private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "com.grtnr.Filmz", category: "ImageCache")
     
     /// Shared instance for app-wide caching.
     static let shared = ImageCache()
@@ -62,6 +75,7 @@ class ImageCache: ObservableObject {
         if let imageData = try? Data(contentsOf: fileUrl),
            let diskImage = UIImage(data: imageData) {
             cache.setObject(diskImage, forKey: key)
+            memoryKeySet.insert(urlString)
             return Image(uiImage: diskImage)
         }
         
@@ -75,8 +89,13 @@ class ImageCache: ObservableObject {
             if let downloadedImage = UIImage(data: data) {
                 // Cache in memory and on disk.
                 cache.setObject(downloadedImage, forKey: key)
+                memoryKeySet.insert(urlString)
                 try? data.write(to: fileUrl)
                 
+                // Write companion file with original URL
+                let urlFile = cacheDirectory.appendingPathComponent(fileName + ".url")
+                try? urlString.write(to: urlFile, atomically: true, encoding: .utf8)
+
                 // 4. Upload to CloudKit shared area asynchronously.
                 Task {
                     await self.uploadImageToCloudKit(urlString: urlString, imageData: data)
@@ -123,6 +142,7 @@ class ImageCache: ObservableObject {
     /// Clears all cached images from both memory and disk.
     func clearCache() {
         cache.removeAllObjects()
+        memoryKeySet.removeAll()
         try? fileManager.removeItem(at: cacheDirectory)
         try? fileManager.createDirectory(at: cacheDirectory, withIntermediateDirectories: true)
     }
