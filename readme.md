@@ -47,14 +47,19 @@ Switching on/off **debug** is needed because some features are _hidden_ behind t
 
 Features in no specific order:
 
-* Build the corresponding website using Jekyll and the [Minimal Mistakes Theme](https://github.com/mmistakes/minimal-mistakes). 
-* Cache the movie pictures in order to speed up the app.
+* Add MY RATING next to the OMDB Rating
 * Share a movie with a friend.
+* View what I have in my cache.
 
 Technical playgrounds & toys on my list:
 
 * Use Windsurf in order to compare it to cursor ai
 * use Google AI Studio to work on the website
+
+## Done
+
+* 2025-02-16 Replace my image cache with [Kingfisher](https://github.com/onevcat/Kingfisher).
+* 2025-02 Cache the movie pictures in order to speed up the app.
 
 ## Movie Databases
 

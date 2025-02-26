@@ -1,4 +1,5 @@
 import SwiftUI
+import Kingfisher
 
 struct ContentView: View {
     @StateObject private var filmStore = FilmStore()
@@ -14,13 +15,6 @@ struct ContentView: View {
                 .tabItem {
                     Label("Search", systemImage: "magnifyingglass")
                 }
-
-            // #if DEBUG  2025-02-14 TODO Could not figure out how to set/unset DEBUG
-            CacheView()
-                .tabItem {
-                    Label("Cache", systemImage: "gear")
-                }
-            // #endif
         }
     }
 }
