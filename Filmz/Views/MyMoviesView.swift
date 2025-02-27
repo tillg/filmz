@@ -12,7 +12,6 @@ struct MyMoviesView: View {
                 .onDelete { indexSet in
                     for index in indexSet {
                         Task {
-                            // Remove from CloudKit and local store
                             await filmStore.deleteFilm(filmStore.films[index])
                         }
                     }

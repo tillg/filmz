@@ -14,10 +14,14 @@ struct PosterImage: View {
         self.imageUrl = URL(string: imageUrl)!
     }
     
+    // We can call a posterImage w/o any image - it will show a placeholder
+    init() {
+        self.imageUrl = URL(string: "")!
+    }
+    
     var body: some View {
         KFImage.url(self.imageUrl)
             .placeholder {
-                // Use your placeholderImage (a SwiftUI Image) as the placeholder view
                 placeholderImage
                     .resizable()
                     .scaledToFit()

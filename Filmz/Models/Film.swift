@@ -53,7 +53,6 @@ struct Film: Identifiable, Codable {
     /// URL of the film's poster image
     var posterUrl: String
     
-    
     /// Brief description of the film
     var description: String
     
@@ -214,25 +213,6 @@ struct Film: Identifiable, Codable {
         self.watchDate = watchDate
         self.streamingService = streamingService
         self.dateAdded = dateAdded
-    }
-    
-    static func dummy(from result: IMDBService.SearchResult) -> Film {
-        Film(
-            title: result.Title,
-            year: result.Year,
-            genres: [],
-            imdbRating: 0.0,
-            posterUrl: result.Poster,
-            description: "",
-            country: "",
-            language: "",
-            releaseDate: Date(),
-            runtime: 0,
-            plot: "",
-            intendedAudience: .alone,
-            watched: false,
-            dateAdded: Date()
-        )
     }
     
     static func create(from result: IMDBService.SearchResult, 

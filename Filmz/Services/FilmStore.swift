@@ -79,7 +79,6 @@ class FilmStore: ObservableObject {
         // Create a mutable copy of the film
         let filmToAdd = film
         
-        
         // Delegate to repository
         do {
             try await repository.addFilm(filmToAdd)

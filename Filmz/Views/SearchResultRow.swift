@@ -5,13 +5,9 @@ import SwiftUI
 struct SearchResultRow: View {
     let result: IMDBService.SearchResult
     
-    private var dummyFilm: Film {
-        Film.dummy(from: result)  // Using the factory method consistently
-    }
-    
     var body: some View {
         HStack(spacing: 12) {
-            PosterImage(imageUrl: dummyFilm.posterUrl)
+            PosterImage()
             .frame(width: 50, height: 75)
             .cornerRadius(8)
             
