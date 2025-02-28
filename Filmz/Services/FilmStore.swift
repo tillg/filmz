@@ -15,36 +15,36 @@ import CloudKit
 class FilmStore: ObservableObject {
     /// The current collection of films, published for SwiftUI updates
     @Published private(set) var films: [Film] = []
-    
+
     /// Current status of iCloud connectivity, published for UI feedback
     @Published private(set) var iCloudStatus: String = ""
-    
+
     /// Current sort option for the film collection, automatically triggers resort on change
     @Published var sortOption: SortOption = .dateAdded {
         didSet {
             sortFilms()
         }
     }
-    
+
     /// The repository handling persistent storage operations
     private let repository: FilmRepository
-    
+
     /// Logger instance for debugging and error tracking
     private let logger = Logger(subsystem: Bundle.main.bundleIdentifier!, category: "FilmStore")
-    
+
     /// Initialize the FilmStore with a FilmRepository
     /// - Parameter repository: The repository to use for persistence. Defaults to CloudKitFilmRepository
     init(repository: FilmRepository = CloudKitFilmRepository()) {
         self.repository = repository
         logger.info("FilmStore initialized")
-        
+
         checkICloudStatus()
-        
+
         Task {
             await loadFilms()
         }
     }
-    
+
     /// Loads all films from the repository into memory
     private func loadFilms() async {
         do {
@@ -56,12 +56,12 @@ class FilmStore: ObservableObject {
             logger.error("loadFilms failed: \\(error.localizedDescription)")
         }
     }
-    
+
     /// Sorts the films array based on the current sort option
     private func sortFilms() {
         films = SortOption.sort(films, by: sortOption)
     }
-    
+
     /// Adds a new film to both the repository and local collection
     /// - Parameter film: The film to add
     /// - Note: This method will:
@@ -75,10 +75,10 @@ class FilmStore: ObservableObject {
             logger.info("Film already exists in library: \\(film.title) (\\(film.year))")
             return
         }
-        
+
         // Create a mutable copy of the film
         let filmToAdd = film
-        
+
         // Delegate to repository
         do {
             try await repository.addFilm(filmToAdd)
@@ -88,7 +88,7 @@ class FilmStore: ObservableObject {
             logger.error("Error adding film \\(film.title): \\(error.localizedDescription)")
         }
     }
-    
+
     /// Removes a film from both the repository and local collection
     /// - Parameter film: The film to delete
     func deleteFilm(_ film: Film) async {
@@ -99,7 +99,7 @@ class FilmStore: ObservableObject {
             logger.error("Error deleting film \\(film.title): \\(error.localizedDescription)")
         }
     }
-    
+
     /// Updates an existing film with new data
     /// - Parameters:
     ///   - film: The film to update
@@ -110,9 +110,9 @@ class FilmStore: ObservableObject {
     ///   3. Update the local collection
     func updateFilm(_ film: Film, with data: EditedFilmData) async {
         do {
-            
+
             try await repository.updateFilm(film, with: data)
-            
+
             // Reflect changes in the local array
             if let index = films.firstIndex(where: { $0.id == film.id }) {
                 films[index] = Film(
@@ -140,7 +140,7 @@ class FilmStore: ObservableObject {
             logger.error("Error updating film \\(film.title): \\(error.localizedDescription)")
         }
     }
-    
+
     /// Checks and updates the current iCloud account status
     /// - Note: This is used to provide feedback to the user about their iCloud connectivity
     private func checkICloudStatus() {
@@ -160,7 +160,8 @@ class FilmStore: ObservableObject {
                 @unknown default:
                     self?.iCloudStatus = "Unknown iCloud status: \\(status.rawValue)"
                 }
-                self?.logger.info("iCloud Status: \\(self?.iCloudStatus ?? \"\")")
+                self?.logger.debug("iCloud Status: \\(self?.iCloudStatus ?? \"\")")
+                print("iCloud Status: \\(self?.iCloudStatus ?? \"\")")
             }
         }
     }
