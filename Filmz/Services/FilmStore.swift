@@ -39,7 +39,7 @@ class FilmStore: ObservableObject {
     /// - Parameter repository: The repository to use for persistence. Defaults to CloudKitFilmRepository
     init(repository: FilmRepository = CloudKitFilmRepository()) {
         self.repository = repository
-        logger.debug("FilmStore initialized")
+        logger.info("FilmStore initialized")
 
         checkICloudStatus()
 
@@ -57,9 +57,9 @@ class FilmStore: ObservableObject {
             let loaded = try await repository.fetchAllFilms()
             films = loaded
             sortFilms()
-            logger.info("Successfully loaded \\(loaded.count) films from repository")
+            logger.info("Successfully loaded \(loaded.count) films from repository")
         } catch {
-            logger.error("loadFilms failed: \\(error.localizedDescription)")
+            logger.error("loadFilms failed: \(error.localizedDescription)")
         }
     }
 
@@ -80,7 +80,7 @@ class FilmStore: ObservableObject {
 
         // Check if film already exists in memory
         if films.contains(where: { $0.title.lowercased() == film.title.lowercased() && $0.year == film.year }) {
-            logger.info("Film already exists in library: \\(film.title) (\\(film.year))")
+            logger.info("Film already exists in library: \(film.title) (\(film.year))")
             return
         }
 
@@ -93,7 +93,7 @@ class FilmStore: ObservableObject {
             films.append(filmToAdd)
             sortFilms()
         } catch {
-            logger.error("Error adding film \\(film.title): \\(error.localizedDescription)")
+            logger.error("Error adding film \(film.title): \(error.localizedDescription)")
         }
     }
 
@@ -104,7 +104,7 @@ class FilmStore: ObservableObject {
             try await repository.deleteFilm(film)
             films.removeAll { $0.id == film.id }
         } catch {
-            logger.error("Error deleting film \\(film.title): \\(error.localizedDescription)")
+            logger.error("Error deleting film \(film.title): \(error.localizedDescription)")
         }
     }
 
@@ -145,7 +145,7 @@ class FilmStore: ObservableObject {
                 )
             }
         } catch {
-            logger.error("Error updating film \\(film.title): \\(error.localizedDescription)")
+            logger.error("Error updating film \(film.title): \(error.localizedDescription)")
         }
     }
 
@@ -162,13 +162,13 @@ class FilmStore: ObservableObject {
                 case .restricted:
                     self?.iCloudStatus = "iCloud Restricted"
                 case .couldNotDetermine:
-                    self?.iCloudStatus = "Could not determine iCloud status: \\(error?.localizedDescription ?? \"\")"
+                    self?.iCloudStatus = "Could not determine iCloud status: \(error?.localizedDescription ?? "") "
                 case .temporarilyUnavailable:
                     self?.iCloudStatus = "iCloud Temporarily Unavailable"
                 @unknown default:
-                    self?.iCloudStatus = "Unknown iCloud status: \\(status.rawValue)"
+                    self?.iCloudStatus = "Unknown iCloud status: \(status.rawValue)"
                 }
-                self?.logger.error("iCloud Status: \(self?.iCloudStatus ?? "Unknown")")
+                self?.logger.info("iCloud Status: \(self?.iCloudStatus ?? "Unknown")")
             }
         }
     }

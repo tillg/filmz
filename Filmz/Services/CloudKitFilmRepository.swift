@@ -42,13 +42,13 @@ actor CloudKitFilmRepository: FilmRepository {
                     let record = try result.1.get()
                     return from(record: record)
                 } catch {
-                    logger.error("Error decoding CKRecord: \\(error.localizedDescription)")
+                    logger.error("Error decoding CKRecord: \(error.localizedDescription)")
                     return nil
                 }
             }
             return loadedFilms
         } catch {
-            logger.error("fetchAllFilms failed: \\(error.localizedDescription)")
+            logger.error("fetchAllFilms failed: \(error.localizedDescription)")
             throw error
         }
     }
@@ -58,16 +58,16 @@ actor CloudKitFilmRepository: FilmRepository {
     /// - Throws: CloudKit errors if the save fails
     /// - Note: This creates a new CKRecord with the film's data and any associated assets
     func addFilm(_ film: Film) async throws {
-        logger.info("Adding film to CloudKit: \\(film.title)")
+        logger.info("Adding film to CloudKit: \(film.title)")
         
         let record = CKRecord(recordType: "Film")
         toRecord(record, from: film)
         
         do {
             _ = try await database.save(record)
-            logger.info("Successfully saved film record: \\(film.title)")
+            logger.info("Successfully saved film record: \(film.title)")
         } catch {
-            logger.error("Error saving film record: \\(error.localizedDescription)")
+            logger.error("Error saving film record: \(error.localizedDescription)")
             throw error
         }
     }
@@ -82,7 +82,7 @@ actor CloudKitFilmRepository: FilmRepository {
     ///   2. Updates only the fields that can be edited
     ///   3. Preserves other fields
     func updateFilm(_ film: Film, with data: EditedFilmData) async throws {
-        logger.info("Updating film in CloudKit: \\(film.title)")
+        logger.info("Updating film in CloudKit: \(film.title)")
         
         let query = CKQuery(
             recordType: "Film",
@@ -92,7 +92,7 @@ actor CloudKitFilmRepository: FilmRepository {
         do {
             let records = try await database.records(matching: query)
             guard let record = try records.matchResults.first?.1.get() else {
-                logger.error("No matching record found to update for \\(film.title)")
+                logger.error("No matching record found to update for \(film.title)")
                 return
             }
             
@@ -108,13 +108,13 @@ actor CloudKitFilmRepository: FilmRepository {
             
             do {
                 _ = try await database.save(record)
-                logger.info("Successfully updated film record: \\(film.title)")
+                logger.info("Successfully updated film record: \(film.title)")
             } catch {
-                logger.error("Error updating film record: \\(error.localizedDescription)")
+                logger.error("Error updating film record: \(error.localizedDescription)")
                 throw error
             }
         } catch {
-            logger.error("updateFilm failed for \\(film.title): \\(error.localizedDescription)")
+            logger.error("updateFilm failed for \(film.title): \(error.localizedDescription)")
             throw error
         }
     }
@@ -124,7 +124,7 @@ actor CloudKitFilmRepository: FilmRepository {
     /// - Throws: CloudKit errors if the deletion fails
     /// - Note: This method finds the record by title and year before deleting
     func deleteFilm(_ film: Film) async throws {
-        logger.info("Deleting film from CloudKit: \\(film.title)")
+        logger.info("Deleting film from CloudKit: \(film.title)")
         
         let query = CKQuery(
             recordType: "Film",
@@ -135,12 +135,12 @@ actor CloudKitFilmRepository: FilmRepository {
             let records = try await database.records(matching: query)
             if let record = try records.matchResults.first?.1.get() {
                 try await database.deleteRecord(withID: record.recordID)
-                logger.info("Successfully deleted record for film: \\(film.title)")
+                logger.info("Successfully deleted record for film: \(film.title)")
             } else {
-                logger.warning("No matching record found to delete for \\(film.title)")
+                logger.warning("No matching record found to delete for \(film.title)")
             }
         } catch {
-            logger.error("deleteFilm failed for \\(film.title): \\(error.localizedDescription)")
+            logger.error("deleteFilm failed for \(film.title): \(error.localizedDescription)")
             throw error
         }
     }
