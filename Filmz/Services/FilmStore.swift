@@ -169,7 +169,6 @@ class FilmStore: ObservableObject {
                     self?.iCloudStatus = "Unknown iCloud status: \\(status.rawValue)"
                 }
                 self?.logger.error("iCloud Status: \(self?.iCloudStatus ?? "Unknown")")
-                print("iCloud Status: \(self?.iCloudStatus ?? "Unknown")")
             }
         }
     }

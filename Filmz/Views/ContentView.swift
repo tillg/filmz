@@ -10,12 +10,12 @@ struct ContentView: View {
             TabView {
                 FilmListView(filmStore: filmStore, watchFilter: $watchFilter)
                     .tabItem {
-                        Label("My Movies", systemImage: "film")
+                        Label("My Filmz", systemImage: "film")
                     }
 
                 SearchFilmsView(filmStore: filmStore)
                     .tabItem {
-                        Label("Search", systemImage: "magnifyingglass")
+                        Label("Add Film", systemImage: "plus")
                     }
             }
         }
