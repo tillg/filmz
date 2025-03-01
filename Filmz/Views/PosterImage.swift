@@ -2,21 +2,20 @@ import SwiftUI
 import Kingfisher
 
 struct PosterImage: View {
-    let imageUrl: URL
-    //let placeholderImageUrl = Bundle.main.url(forResource: "icon-1024", withExtension: "png")!
+    let imageUrl: URL?
     let placeholderImage = Image("placeholder")
-    
-    init(imageUrl: URL) {
+
+    init(imageUrl: URL?) {
         self.imageUrl = imageUrl
     }
 
-    init(imageUrl: String) {
-        self.imageUrl = URL(string: imageUrl)!
+    init(imageUrl: String?) {
+        self.imageUrl = URL(string: imageUrl ?? "")
     }
 
-    // We can call a posterImage w/o any image - it will show a placeholder
+    // Default init: sets `imageUrl` to nil
     init() {
-        self.imageUrl = URL(string: "")!
+        self.imageUrl = nil
     }
 
     var body: some View {

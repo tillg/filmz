@@ -7,7 +7,7 @@ struct SearchResultRow: View {
     
     var body: some View {
         HStack(spacing: 12) {
-            PosterImage()
+            PosterImage(imageUrl: result.Poster)
             .frame(width: 50, height: 75)
             .cornerRadius(8)
             

@@ -1,8 +1,8 @@
 import SwiftUI
+import CoreData
 
 struct FilmListView: View {
-    let films: [Film]
-    let filmStore: FilmStore
+    @ObservedObject var filmStore: FilmStore  // Changed from @StateObject to @ObservedObject
     @Binding var watchFilter: WatchFilter
     @State private var selectedGenre: String?
     
@@ -20,12 +20,12 @@ struct FilmListView: View {
     
     var availableGenres: [String] {
         // Get unique genres from all films
-        let genres = Set(films.flatMap { $0.genres }).sorted()
+        let genres = Set(filmStore.films.flatMap { $0.genres }).sorted()
         return genres
     }
     
     var filteredAndSortedFilms: [Film] {
-        var filtered = films
+        var filtered = filmStore.films
         
         // Apply watch filter
         switch watchFilter {
@@ -79,42 +79,42 @@ struct FilmListView: View {
             // Genre Filter
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack {
-                    Button(action: { selectedGenre = nil }) {
-                        Text("All Genres")
-                            .padding(.horizontal, 12)
-                            .padding(.vertical, 6)
-                            .background(selectedGenre == nil ? Color.accentColor : Color.gray.opacity(0.2))
-                            .foregroundColor(selectedGenre == nil ? .white : .primary)
-                            .cornerRadius(16)
-                    }
+                    GenreButton(genre: "All Genres", action:  { selectedGenre = nil }, isActive: (selectedGenre == nil))
                     
                     ForEach(availableGenres, id: \.self) { genre in
-                        Button(action: { selectedGenre = genre }) {
-                            Text(genre)
-                                .padding(.horizontal, 12)
-                                .padding(.vertical, 6)
-                                .background(selectedGenre == genre ? Color.accentColor : Color.gray.opacity(0.2))
-                                .foregroundColor(selectedGenre == genre ? .white : .primary)
-                                .cornerRadius(16)
-                        }
+                        GenreButton(genre: genre, action: { selectedGenre = genre }, isActive: selectedGenre == genre)
                     }
                 }
                 .padding(.horizontal)
             }
             .padding(.bottom)
             
-            List {
-                ForEach(filteredAndSortedFilms) { film in
-                    FilmRow(film: film, filmStore: filmStore)
-                }
-                .onDelete { indexSet in
-                    for index in indexSet {
-                        Task {
-                            await filmStore.deleteFilm(filteredAndSortedFilms[index])
+            if filmStore.isLoading {
+                Spacer()
+                ProgressView()
+                    .padding()
+                Spacer()
+            } else if filteredAndSortedFilms.isEmpty {
+                Spacer()
+                Text("No films found")
+                    .foregroundColor(.secondary)
+                    .padding()
+                Spacer()
+            } else {
+                List {
+                    ForEach(filteredAndSortedFilms) { film in
+                        FilmRow(film: film, filmStore: filmStore)
+                    }
+                    .onDelete { indexSet in
+                        for index in indexSet {
+                            Task {
+                                await filmStore.deleteFilm(filteredAndSortedFilms[index])
+                            }
                         }
                     }
                 }
+                .padding(.bottom, 10)
             }
         }
     }
-} 
+}

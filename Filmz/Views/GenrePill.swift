@@ -12,3 +12,15 @@ struct GenrePill: View {
             .clipShape(Capsule())
     }
 } 
+
+#Preview {
+    HStack {
+        GenrePill(genre: "Action")
+        GenrePill(genre: "Thriller")
+        GenrePill(genre: "Crime")
+        GenrePill(genre: "Comedy")
+        GenrePill(genre: "Drama")
+        GenrePill(genre: "Horror")
+        GenrePill(genre: "Sci-Fi")
+    }
+}

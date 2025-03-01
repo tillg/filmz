@@ -15,6 +15,9 @@ import CloudKit
 class FilmStore: ObservableObject {
     /// The current collection of films, published for SwiftUI updates
     @Published private(set) var films: [Film] = []
+    
+    /// Indicates whether films are currently being loaded
+    @Published private(set) var isLoading: Bool = false
 
     /// Current status of iCloud connectivity, published for UI feedback
     @Published private(set) var iCloudStatus: String = ""
@@ -36,7 +39,7 @@ class FilmStore: ObservableObject {
     /// - Parameter repository: The repository to use for persistence. Defaults to CloudKitFilmRepository
     init(repository: FilmRepository = CloudKitFilmRepository()) {
         self.repository = repository
-        logger.info("FilmStore initialized")
+        logger.debug("FilmStore initialized")
 
         checkICloudStatus()
 
@@ -47,6 +50,9 @@ class FilmStore: ObservableObject {
 
     /// Loads all films from the repository into memory
     private func loadFilms() async {
+        isLoading = true
+        defer { isLoading = false }
+        
         do {
             let loaded = try await repository.fetchAllFilms()
             films = loaded
@@ -70,6 +76,8 @@ class FilmStore: ObservableObject {
     ///   3. Save to repository
     ///   4. Update local collection
     func addFilm(_ film: Film) async {
+        print("FilmStore.addFilm: \(film)")
+
         // Check if film already exists in memory
         if films.contains(where: { $0.title.lowercased() == film.title.lowercased() && $0.year == film.year }) {
             logger.info("Film already exists in library: \\(film.title) (\\(film.year))")
@@ -160,8 +168,8 @@ class FilmStore: ObservableObject {
                 @unknown default:
                     self?.iCloudStatus = "Unknown iCloud status: \\(status.rawValue)"
                 }
-                self?.logger.debug("iCloud Status: \\(self?.iCloudStatus ?? \"\")")
-                print("iCloud Status: \\(self?.iCloudStatus ?? \"\")")
+                self?.logger.error("iCloud Status: \(self?.iCloudStatus ?? "Unknown")")
+                print("iCloud Status: \(self?.iCloudStatus ?? "Unknown")")
             }
         }
     }

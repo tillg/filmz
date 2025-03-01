@@ -3,22 +3,21 @@ import Kingfisher
 
 struct ContentView: View {
     @StateObject private var filmStore = FilmStore()
+    @State private var watchFilter: FilmListView.WatchFilter = .all
 
     var body: some View {
-        TabView {
-            MyMoviesView(filmStore: filmStore)
-                .tabItem {
-                    Label("My Movies", systemImage: "film")
-                }
+        NavigationStack {
+            TabView {
+                FilmListView(filmStore: filmStore, watchFilter: $watchFilter)
+                    .tabItem {
+                        Label("My Movies", systemImage: "film")
+                    }
 
-            SearchFilmsView(filmStore: filmStore)
-                .tabItem {
-                    Label("Search", systemImage: "magnifyingglass")
-                }
+                SearchFilmsView(filmStore: filmStore)
+                    .tabItem {
+                        Label("Search", systemImage: "magnifyingglass")
+                    }
+            }
         }
     }
 }
-
-#Preview {
-    ContentView()
-} 
