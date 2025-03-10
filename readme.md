@@ -49,7 +49,7 @@ Features in no specific order:
 
 * Add MY RATING next to the OMDB Rating
 * Share a movie with a friend.
-* View what I have in my cache.
+* Replace the logo with `Image(systemName: "film.stack")` and maybe `breath`  animation.
 
 Technical playgrounds & toys on my list:
 
@@ -60,6 +60,12 @@ Technical playgrounds & toys on my list:
 
 * 2025-02-16 Replace my image cache with [Kingfisher](https://github.com/onevcat/Kingfisher).
 * 2025-02 Cache the movie pictures in order to speed up the app.
+
+## Storing Filmz
+
+In order to store filmz in iCloudKit and to maintain them in the app, these are the involved classes:
+
+![Film Storage](FilmStorage.drawio.png)
 
 ## Movie Databases
 
