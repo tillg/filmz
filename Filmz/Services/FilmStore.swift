@@ -125,6 +125,7 @@ class FilmStore: ObservableObject {
             if let index = films.firstIndex(where: { $0.id == film.id }) {
                 films[index] = Film(
                     id: film.id,
+                    imdbId: film.imdbId,
                     title: film.title,
                     year: film.year,
                     genres: data.genres,

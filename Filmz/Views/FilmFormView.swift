@@ -139,6 +139,7 @@ struct FilmFormView: View {
                             ))
                         } else if let result = imdbResult {
                             let film = Film(
+                                imdbId: result.imdbID,
                                 title: result.Title,
                                 year: result.Year,
                                 genres: Array(selectedGenres),

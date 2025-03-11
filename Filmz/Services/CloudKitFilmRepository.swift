@@ -161,12 +161,12 @@ actor CloudKitFilmRepository: FilmRepository {
         
         return Film(
             id: UUID(),
+            imdbId: record["imdbId"] as? String ?? "",
             title: title,
             year: year,
             genres: record["genres"] as? [String] ?? [],
             imdbRating: 0.0, // We don't store IMDB rating in CloudKit
             posterUrl: record["posterUrl"] as? String ?? "",
-            posterAsset: record["posterAsset"] as? CKAsset,
             description: record["description"] as? String ?? "",
             country: record["country"] as? String ?? "",
             language: record["language"] as? String ?? "",

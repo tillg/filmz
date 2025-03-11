@@ -19,6 +19,9 @@ struct Film: Identifiable, Codable {
     /// Unique identifier for the film
     let id: UUID
     
+    /// IMDB id
+    let imdbId: String
+    
     /// Title of the film
     let title: String
     
@@ -110,7 +113,7 @@ struct Film: Identifiable, Codable {
     }
     
     enum CodingKeys: String, CodingKey {
-        case id, title, year, genres, posterUrl, posterAsset, description, trailerUrl
+        case id, imdbId, title, year, genres, posterUrl,  description, trailerUrl
         case country, language, releaseDate, plot, dateAdded
         case recommendedBy, intendedAudience, watched, watchDate, streamingService
         case myRating = "_myRating"
@@ -118,10 +121,12 @@ struct Film: Identifiable, Codable {
         case runtime = "_runtime"
     }
     
+    // Initializes a new Film instance from a decoder
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         
         id = try container.decode(UUID.self, forKey: .id)
+        imdbId = try container.decode(String.self, forKey: .imdbId)
         title = try container.decode(String.self, forKey: .title)
         year = try container.decode(String.self, forKey: .year)
         genres = try container.decode([String].self, forKey: .genres)
@@ -145,6 +150,7 @@ struct Film: Identifiable, Codable {
         streamingService = try container.decodeIfPresent(String.self, forKey: .streamingService)
     }
     
+    // Encodes the Film instance to an encoder
     func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         
@@ -172,14 +178,15 @@ struct Film: Identifiable, Codable {
         try container.encodeIfPresent(streamingService, forKey: .streamingService)
     }
     
+    // Initializes a new Film instance with the provided parameters
     init(
         id: UUID = UUID(),
+        imdbId: String,
         title: String,
         year: String,
         genres: [String],
         imdbRating: Double,
         posterUrl: String,
-        posterAsset: CKAsset? = nil,
         description: String,
         trailerUrl: String? = nil,
         country: String,
@@ -195,6 +202,7 @@ struct Film: Identifiable, Codable {
         dateAdded: Date = Date()  // Default to current date
     ) {
         self.id = id
+        self.imdbId = imdbId
         self.title = title
         self.year = year
         self.genres = genres
@@ -215,6 +223,7 @@ struct Film: Identifiable, Codable {
         self.dateAdded = dateAdded
     }
     
+    // Creates a new Film instance from an IMDBService.SearchResult
     static func create(from result: IMDBService.SearchResult, 
                       genres: [String] = [],
                       recommendedBy: String? = nil,
@@ -223,6 +232,7 @@ struct Film: Identifiable, Codable {
                       watchDate: Date? = nil,
                       streamingService: String? = nil) -> Film {
         Film(
+            imdbId: result.imdbID,
             title: result.Title,
             year: result.Year,
             genres: genres,

@@ -106,6 +106,7 @@ struct AddFilmView: View {
                         
                         // Create film with basic info first
                         let film = Film(
+                            imdbId: imdbResult.imdbID,
                             title: imdbResult.Title,
                             year: imdbResult.Year,
                             genres: genres,
@@ -131,6 +132,7 @@ struct AddFilmView: View {
                         if let details = await loadMovieDetails() {
                             // Update with full details
                             let updatedFilm = Film(
+                                imdbId: details.imdbID,
                                 title: details.Title,
                                 year: details.Year,
                                 genres: details.Genre.components(separatedBy: ", "),
