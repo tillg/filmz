@@ -5,6 +5,8 @@ struct MyFilmDetailView: View {
     @StateObject var viewModel: MyFilmDetailViewModel
     let logger = Logger(label: "MyFilmDetailView")
 
+    @Environment(\.dismiss) private var dismiss
+
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
@@ -85,6 +87,7 @@ struct MyFilmDetailView: View {
                 Button("Save") {
                     Task {
                         await viewModel.commitChanges()
+                        dismiss()
                     }
                 }
                 .buttonStyle(.borderedProminent)
