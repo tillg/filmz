@@ -224,7 +224,7 @@ struct Film: Identifiable, Codable {
     }
     
     // Creates a new Film instance from an IMDBService.SearchResult
-    static func create(from result: IMDBService.SearchResult, 
+    static func create(from result: ImdbFilmService.ImdbSearchResult, 
                       genres: [String] = [],
                       recommendedBy: String? = nil,
                       intendedAudience: AudienceType = .alone,

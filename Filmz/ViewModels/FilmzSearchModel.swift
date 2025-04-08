@@ -1,10 +1,11 @@
 import Foundation
 import SwiftUI
+import Logging
 
 @MainActor
-class FilmzViewModel: ObservableObject {
-    private var imdbService: IMDBService?
-    @Published var searchResults: [IMDBService.SearchResult] = []
+class FilmzSearchModel: ObservableObject {
+    private var imdbService: ImdbFilmService?
+    @Published var searchResults: [ImdbFilmService.ImdbSearchResult] = []
     @Published var isSearching = false
     @Published var searchError: Error?
     @Published var canLoadMore = false
@@ -14,13 +15,18 @@ class FilmzViewModel: ObservableObject {
     private var currentPage = 1
     private var totalResults = 0
     
+    private let logger = Logger(label: "FilmzSearchModel")
+
     init() {
+        logger.info("Initializing FilmzSearchModel")
         initializeService()
+        logger.info("FilmzSearchModel initialized")
+
     }
     
     private func initializeService() {
         do {
-            imdbService = try IMDBService()
+            imdbService = try ImdbFilmService()
         } catch {
             serviceInitError = error
         }
@@ -48,7 +54,7 @@ class FilmzViewModel: ObservableObject {
         
         Task {
             do {
-                let state = try await imdbService.searchMovies(query)
+                let state = try await imdbService.searchFilms(query)
                 searchResults = state.results
                 totalResults = state.totalResults
                 currentPage = 1
@@ -70,7 +76,7 @@ class FilmzViewModel: ObservableObject {
         
         do {
             let nextPage = currentPage + 1
-            let state = try await imdbService.searchMovies(currentQuery, page: nextPage)
+            let state = try await imdbService.searchFilms(currentQuery, page: nextPage)
             searchResults.append(contentsOf: state.results)
             currentPage = nextPage
             canLoadMore = searchResults.count < totalResults

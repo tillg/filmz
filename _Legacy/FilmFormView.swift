@@ -7,7 +7,7 @@ struct FilmFormView: View {
     // Optional film for edit mode, nil for add mode
     let existingFilm: Film?
     // Required for add mode
-    let imdbResult: IMDBService.SearchResult?
+    let imdbResult: ImdbFilmService.ImdbSearchResult?
     
     @State private var selectedGenres: Set<String>
     @State private var watchStatus: Bool
@@ -16,7 +16,7 @@ struct FilmFormView: View {
     @State private var recommendedBy: String
     @State private var audience: Film.AudienceType
     
-    init(filmStore: FilmStore, existingFilm: Film? = nil, imdbResult: IMDBService.SearchResult? = nil) {
+    init(filmStore: FilmStore, existingFilm: Film? = nil, imdbResult: ImdbFilmService.ImdbSearchResult? = nil) {
         self.filmStore = filmStore
         self.existingFilm = existingFilm
         self.imdbResult = imdbResult

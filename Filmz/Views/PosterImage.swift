@@ -25,5 +25,8 @@ struct PosterImage: View {
                     .resizable()
                     .scaledToFit()
             }
+            .resizable()
+            .scaledToFit()
+
     }
 }

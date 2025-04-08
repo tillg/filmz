@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		F9ABD1732D6EEFE6008E94AA /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = F9ABD1722D6EEFE6008E94AA /* Kingfisher */; };
+		F9FC694B2D93DA6500FB8D5B /* Logging in Frameworks */ = {isa = PBXBuildFile; productRef = F9FC694A2D93DA6500FB8D5B /* Logging */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -70,6 +71,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F9FC694B2D93DA6500FB8D5B /* Logging in Frameworks */,
 				F9ABD1732D6EEFE6008E94AA /* Kingfisher in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -98,6 +100,7 @@
 				F926406E2D38FED400C5F2C0 /* Filmz */,
 				F926407F2D38FED500C5F2C0 /* FilmzTests */,
 				F92640892D38FED500C5F2C0 /* FilmzUITests */,
+				F9FC69492D93DA6500FB8D5B /* Frameworks */,
 				F926406D2D38FED400C5F2C0 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -110,6 +113,13 @@
 				F92640862D38FED500C5F2C0 /* FilmzUITests.xctest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		F9FC69492D93DA6500FB8D5B /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -134,6 +144,7 @@
 			name = Filmz;
 			packageProductDependencies = (
 				F9ABD1722D6EEFE6008E94AA /* Kingfisher */,
+				F9FC694A2D93DA6500FB8D5B /* Logging */,
 			);
 			productName = Filmz;
 			productReference = F926406C2D38FED400C5F2C0 /* Filmz.app */;
@@ -219,6 +230,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				F9ABD1712D6EEFE6008E94AA /* XCRemoteSwiftPackageReference "Kingfisher" */,
+				F9FC68EE2D93038400FB8D5B /* XCRemoteSwiftPackageReference "swift-log" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = F926406D2D38FED400C5F2C0 /* Products */;
@@ -463,6 +475,7 @@
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				INSTALL_GROUP = 1913861949;
+				IPHONEOS_DEPLOYMENT_TARGET = 18;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -505,6 +518,7 @@
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				INSTALL_GROUP = 1913861949;
+				IPHONEOS_DEPLOYMENT_TARGET = 18;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -644,6 +658,14 @@
 				minimumVersion = 8.2.0;
 			};
 		};
+		F9FC68EE2D93038400FB8D5B /* XCRemoteSwiftPackageReference "swift-log" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/apple/swift-log.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.6.3;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -651,6 +673,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = F9ABD1712D6EEFE6008E94AA /* XCRemoteSwiftPackageReference "Kingfisher" */;
 			productName = Kingfisher;
+		};
+		F9FC694A2D93DA6500FB8D5B /* Logging */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = F9FC68EE2D93038400FB8D5B /* XCRemoteSwiftPackageReference "swift-log" */;
+			productName = Logging;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

@@ -1,42 +1,47 @@
 import SwiftUI
 
 struct FilmRow: View {
-    let film: Film
-    let filmStore: FilmStore
+    //@Binding var myFilm: MyFilm
+    let myFilmId: UUID
+    private let myFilmStore: MyFilmStore
+    private var myFilm: MyFilm
+    @State private var imdbFilm: ImdbFilm? = nil
+    
+    init(myFilmId: UUID, filmStore: MyFilmStore) {
+            self.myFilmId = myFilmId
+            self.myFilmStore = filmStore
+            self.myFilm = filmStore.getFilmById(myFilmId)!
+        }
     
     var body: some View {
-        NavigationLink(destination: FilmFormView(filmStore: filmStore, existingFilm: film)) {
+        NavigationLink(destination: MyFilmDetailView(viewModel: MyFilmDetailViewModel(myFilmId: myFilmId,  filmStore: myFilmStore)))
+        {
             HStack {
-                PosterImage(imageUrl: film.posterUrl)
+                PosterImage(imageUrl: imdbFilm?.posterUrl)
                     .frame(width: 50, height: 75)
                     .cornerRadius(8)
                 
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(film.title)
+                    Text(imdbFilm?.title ??  "Untitled")
                         .font(.headline)
                     HStack(spacing: 4) {
-                        Text(film.year)
-                        if film.imdbRating > 0 {
+                        Text(imdbFilm?.year ?? "Unknown")
+                        if imdbFilm?.imdbRating ?? 0 > 0 {
                             Text("•")
                         }
-                        IMDbRatingView(rating: film.imdbRating)
+                        ImdbRatingView(rating: imdbFilm?.imdbRating ?? 0)
                     }
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
-                    
-                    FlowLayout(spacing: 4) {
-                        ForEach(film.genres, id: \.self) { genre in
-                            GenrePill(genre: genre)
-                        }
-                    }
+                    GenrePillsHList(genres: imdbFilm?.genres ?? [])
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                     
-                    if film.watched {
+                    if myFilm.watched {
                         HStack(spacing: 4) {
                             Image(systemName: "checkmark.circle.fill")
                                 .foregroundStyle(.green)
-                            if let watchDate = film.watchDate {
+                            if let watchDate = myFilm.watchDate {
                                 Text("Watched on \(watchDate.formatted(date: .abbreviated, time: .omitted))")
                             } else {
                                 Text("Watched")
@@ -46,8 +51,8 @@ struct FilmRow: View {
                         .foregroundStyle(.secondary)
                     }
                     
-                    if abs(film.dateAdded.timeIntervalSinceNow) > 5 {
-                        Text("Added \(film.dateAdded.formatted(date: .abbreviated, time: .omitted))")
+                    if abs(myFilm.dateAdded.timeIntervalSinceNow) > 5 {
+                        Text("Added \(myFilm.dateAdded.formatted(date: .abbreviated, time: .omitted))")
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
@@ -55,7 +60,7 @@ struct FilmRow: View {
                 
                 Spacer()
                 
-                if let rating = film.myRating {
+                if let rating = myFilm.myRating {
                     Text("\(rating)/10")
                         .font(.caption)
                         .padding(6)
@@ -65,5 +70,24 @@ struct FilmRow: View {
             }
             .padding(.vertical, 4)
         }
+        .task {
+            do {
+                imdbFilm = try await myFilm.imdbFilm
+            } catch {
+                logger.error("Error loading film details: \(error)")
+            }
+        }
     }
-} 
+}
+
+
+#Preview {
+    let myFilmRepository = MyFilmRepositoryMock()
+    let filmStore = MyFilmStore(myFilmRepository: myFilmRepository)
+    List {
+        FilmRow(myFilmId: myFilmRepository.films[0].id, filmStore: filmStore)
+            .border(Color.red)
+        FilmRow(myFilmId: myFilmRepository.films[1].id, filmStore: filmStore)
+            .border(Color.red)
+    }
+}

@@ -11,7 +11,22 @@ struct GenrePill: View {
             .background(.secondary.opacity(0.2))
             .clipShape(Capsule())
     }
-} 
+}
+
+struct GenrePillsHList: View {
+    let genres: [String]
+    var body: some View {
+        if genres.isEmpty {
+            EmptyView()
+        } else {
+            HStack {
+                ForEach(genres, id: \.self) { genre in
+                    GenrePill(genre: genre)
+                }
+            }
+        }
+    }
+}
 
 #Preview {
     HStack {

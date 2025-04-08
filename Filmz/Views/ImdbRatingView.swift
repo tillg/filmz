@@ -8,7 +8,7 @@
 
 import SwiftUI
 
-struct IMDbRatingView: View {
+struct ImdbRatingView: View {
     let rating: Double
     
     var body: some View {
@@ -16,7 +16,6 @@ struct IMDbRatingView: View {
             if rating > 0 {
                 Image(systemName: "star.fill")
                     .foregroundStyle(.yellow)
-                    .imageScale(.small)
                 Text(String(format: "%.1f", rating))
                     .font(.subheadline)
                     .foregroundStyle(.secondary)

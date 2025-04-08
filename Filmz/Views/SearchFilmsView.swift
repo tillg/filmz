@@ -1,17 +1,15 @@
 import SwiftUI
-import OSLog
+import Logging
 
 struct SearchFilmsView: View {
-    let filmStore: FilmStore
-    private let logger = Logger(subsystem: Bundle.main.bundleIdentifier!, category: "SearchFilmsView")
+    let filmStore: MyFilmStore
+    private let logger = Logger(label: "SearchFilmsView")
 
-
-    @Environment(\.dismiss) private var dismiss
-    @StateObject private var viewModel = FilmzViewModel()
+    @StateObject private var viewModel = FilmzSearchModel()
     @State private var searchText = ""
     
+    @MainActor
     var body: some View {
-        NavigationView {
             List {
                 if let error = viewModel.serviceInitError {
                     Text("Failed to initialize IMDB service: \(error.localizedDescription)")
@@ -25,7 +23,7 @@ struct SearchFilmsView: View {
                 } else {
                     ForEach(viewModel.searchResults) { result in
                         NavigationLink {
-                            AddFilmView(imdbResult: result, filmStore: filmStore, dismiss: dismiss)
+                            MyFilmDetailView(viewModel: makeDetailViewModel(for: result, filmStore: filmStore))
                         } label: {
                             SearchResultRow(result: result)
                         }
@@ -47,13 +45,13 @@ struct SearchFilmsView: View {
                         }
                     }
                 }
-            }
+            } 
             .navigationTitle("Add Film")
             .searchable(text: $searchText)
             .onChange(of: searchText) { oldValue, newValue in
                 viewModel.search(newValue)
             }
-        }
+        
         .onAppear {
             logger.info("SearchFilmsView appeared")
         }
@@ -61,4 +59,16 @@ struct SearchFilmsView: View {
             logger.info("SearchFilmsView disappeared")
         }
     }
-} 
+}
+
+@MainActor private func makeDetailViewModel(for result: ImdbFilmService.ImdbSearchResult, filmStore: MyFilmStore) -> MyFilmDetailViewModel {
+    let myFilm = MyFilm(imdbId: result.imdbID, intendedAudience: .family)
+    return MyFilmDetailViewModel(newFilm: myFilm, filmStore: filmStore)
+}
+
+#Preview {
+    let myFilmStore = MyFilmStore()
+    NavigationView {
+        SearchFilmsView(filmStore: myFilmStore)
+    }
+}

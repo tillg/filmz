@@ -1,17 +1,23 @@
 <mxfile host="Electron" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/26.0.16 Chrome/132.0.6834.196 Electron/34.2.0 Safari/537.36" version="26.0.16">
   <diagram name="Page-1" id="fC8uANzK3IzWBaoVTia8">
-    <mxGraphModel dx="793" dy="846" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+    <mxGraphModel dx="377" dy="822" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
-        <mxCell id="79tB9wOlwjXWK_jmAb76-2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="ugGi5KEEK_lPGR_BiLdL-1" target="79tB9wOlwjXWK_jmAb76-1">
+        <mxCell id="79tB9wOlwjXWK_jmAb76-2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" parent="1" source="ugGi5KEEK_lPGR_BiLdL-1" target="79tB9wOlwjXWK_jmAb76-1" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="ugGi5KEEK_lPGR_BiLdL-1" value="&lt;div&gt;«class»&lt;br&gt;&lt;/div&gt;&lt;b&gt;IMDBService&lt;/b&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;Searches for Films.&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;pre style=&quot;text-align: left;&quot;&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;searchMovies&lt;br&gt;&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;fetchMovieDetails&lt;/span&gt;&lt;/pre&gt;" style="rounded=0;whiteSpace=wrap;html=1;sketch=1;curveFitting=1;jiggle=2;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="1" vertex="1">
+        <mxCell id="ugGi5KEEK_lPGR_BiLdL-1" value="&lt;div&gt;«actor»&lt;br&gt;&lt;/div&gt;&lt;b&gt;IMDBService&lt;/b&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;Searches for Films.&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;pre style=&quot;text-align: left;&quot;&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;searchMovies&lt;br&gt;&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;fetchMovieDetails&lt;/span&gt;&lt;/pre&gt;" style="rounded=0;whiteSpace=wrap;html=1;sketch=1;curveFitting=1;jiggle=2;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="1" vertex="1">
           <mxGeometry x="157.5" y="200" width="145" height="130" as="geometry" />
         </mxCell>
-        <mxCell id="79tB9wOlwjXWK_jmAb76-1" value="&lt;div&gt;OMDB API&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;sketch=1;curveFitting=1;jiggle=2;fillColor=#eeeeee;strokeColor=#36393d;" vertex="1" parent="1">
+        <mxCell id="79tB9wOlwjXWK_jmAb76-1" value="&lt;div&gt;OMDB API&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;sketch=1;curveFitting=1;jiggle=2;fillColor=#eeeeee;strokeColor=#36393d;" parent="1" vertex="1">
           <mxGeometry x="157.5" y="110" width="145" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="lJJdGCtURV4s-AuM9smU-1" value="&lt;div&gt;«class»&lt;br&gt;&lt;/div&gt;&lt;b&gt;FilmzSearchModel&lt;/b&gt;&lt;br&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;Search for the &lt;u&gt;UI&lt;/u&gt;.&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;pre style=&quot;text-align: left;&quot;&gt;&lt;span style=&quot;background-color: transparent;&quot;&gt;&lt;font style=&quot;color: rgb(0, 0, 0);&quot;&gt;@Published&lt;br&gt;&lt;/font&gt;searchResults&lt;br&gt;&lt;font style=&quot;color: rgb(0, 0, 0);&quot;&gt;isSearching&lt;br&gt;&lt;/font&gt;&lt;/span&gt;searchError&lt;br/&gt;canLoadMore&lt;br/&gt;serviceInitError&lt;br/&gt;&lt;/pre&gt;&lt;pre style=&quot;text-align: left;&quot;&gt;search(query: String)&lt;br/&gt;loadMore()&lt;/pre&gt;" style="rounded=0;whiteSpace=wrap;html=1;sketch=1;curveFitting=1;jiggle=2;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="440" y="130" width="180" height="250" as="geometry" />
+        </mxCell>
+        <mxCell id="lJJdGCtURV4s-AuM9smU-2" value="contains instance" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=1.01;entryY=0.446;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="lJJdGCtURV4s-AuM9smU-1" target="ugGi5KEEK_lPGR_BiLdL-1">
+          <mxGeometry relative="1" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>

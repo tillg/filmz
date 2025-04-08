@@ -6,12 +6,22 @@
 //
 
 import SwiftUI
+import Logging
 
 @main
 struct FilmzApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
+        }
+    }
+    
+    private func setupLogging() {
+        LoggingSystem.bootstrap { label in
+            MultiplexLogHandler([
+                OSLogHandler(label: label),
+                FileLogHandler(label: label),
+            ])
         }
     }
 }

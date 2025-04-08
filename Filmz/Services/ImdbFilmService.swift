@@ -1,9 +1,14 @@
 import Foundation
+import SwiftUI
+import Logging
 
 /// Service for interacting with the OMDB API
-actor IMDBService {
+actor ImdbFilmService: ObservableObject {
     private let apiKey: String
     private let baseUrl = "https://www.omdbapi.com/"
+    private let delay : UInt64 = 0 // Nanoseconds we sleep before loading from APIs
+    private let logger = Logger(label: "ImdbFilmService")
+
     
     init(apiKey: String? = nil) throws {
         if let providedKey = apiKey {
@@ -18,13 +23,13 @@ actor IMDBService {
     }
     
     struct SearchResponse: Codable {
-        let Search: [SearchResult]?
+        let Search: [ImdbSearchResult]?
         let totalResults: String?
         let Response: String
         let Error: String?
     }
     
-    struct SearchResult: Codable, Identifiable {
+    struct ImdbSearchResult: Codable, Identifiable {
         let imdbID: String
         let Title: String
         let Year: String
@@ -36,7 +41,7 @@ actor IMDBService {
         let query: String
         let totalResults: Int
         let currentPage: Int
-        let results: [SearchResult]
+        let results: [ImdbSearchResult]
     }
     
     struct DetailResponse: Codable {
@@ -68,7 +73,7 @@ actor IMDBService {
         let Value: String
     }
     
-    func searchMovies(_ query: String, page: Int = 1) async throws -> SearchState {
+    func searchFilms(_ query: String, page: Int = 1) async throws -> SearchState {
         let cleanedQuery = query.trimmingCharacters(in: .whitespacesAndNewlines)
         let searchQuery = cleanedQuery + "*"
         
@@ -81,6 +86,7 @@ actor IMDBService {
         }
         
         guard let url = URL(string: "\(baseUrl)?apikey=\(apiKey)&s=\(encodedQuery)&page=\(page)") else {
+            logger.error("Invalid URL: \(baseUrl)?apikey=\(apiKey)&s=\(encodedQuery)&page=\(page)")
             throw FilmzError.networkError(URLError(.badURL))
         }
         
@@ -105,22 +111,37 @@ actor IMDBService {
         }
     }
     
-    func fetchMovieDetails(imdbId: String) async throws -> DetailResponse {
+    func fetchFilmDetails(imdbId: String) async throws -> ImdbFilm {
+        logger.info("fetchFilmDetails: Fetching details for film with ID \(imdbId)")
         guard !imdbId.isEmpty else {
+            logger.error("IMDB ID cannot be empty")
             throw FilmzError.filmNotFound("IMDB ID cannot be empty")
         }
         
         guard let url = URL(string: "\(baseUrl)?apikey=\(apiKey)&i=\(imdbId)&plot=full") else {
             throw FilmzError.networkError(URLError(.badURL))
         }
-        
+        logger.info("GETting from url \(url)")
+        try await Task.sleep(nanoseconds: delay) // Simulate network delay for development
+
         do {
             let (data, _) = try await URLSession.shared.data(from: url)
-            return try JSONDecoder().decode(DetailResponse.self, from: data)
+            let decoder = JSONDecoder()
+            decoder.userInfo[.rawJSONData] = data
+            return try decoder.decode(ImdbFilm.self, from: data)
         } catch let error as DecodingError {
             throw FilmzError.decodingError(error)
         } catch {
             throw FilmzError.networkError(error)
         }
+    }
+}
+
+
+#Preview {
+    let batmanId = "tt0372784"
+    let lassoId = "tt10986410"
+    NavigationView {
+        ImdbFilmDetailView(imdbId: batmanId)
     }
 }
